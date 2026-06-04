@@ -1,0 +1,10 @@
+# AI RULES
+
+- Always use PNPM instead of NPM.
+- Never generate npm install or npm run commands unless explicitly requested.
+- Use pnpm install, pnpm add, pnpm dev and pnpm build by default.
+- All explanations must also include Portuguese explanations whenever possible.
+- Prefer scalable, production-ready and modular architecture.
+- Avoid temporary hacks and fragile solutions.
+- Always explain commands before executing them.
+- Assume the user is beginner/intermediate and provide step-by-step guidance.
