@@ -1,9 +1,8 @@
 import React from 'react';
-import { MusicCategory } from '../data/mockData';
 import { Play, Layers } from 'lucide-react';
 
 interface CourseCardProps {
-  categoryName: MusicCategory;
+  categoryName: string;
   imageUrl: string;
   lessonCount: number;
   description: string;

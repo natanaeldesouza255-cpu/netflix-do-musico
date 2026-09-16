@@ -2,6 +2,34 @@ export type MusicCategory = 'Violão' | 'Bateria' | 'Contrabaixo' | 'Reaper' | '
 
 export type MusicLevel = 'Nível Zero' | 'Aprendiz' | 'Mediano' | 'Profissional' | 'Avançado';
 
+export type PublishStatus = 'published' | 'draft';
+export type UserRole = 'student' | 'admin';
+export type AccountStatus = 'active' | 'inactive';
+export type SubscriptionStatus = 'active' | 'cancelled' | 'pending' | 'overdue';
+export type LiveStatus = 'scheduled' | 'live' | 'finished' | 'replay';
+export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'cancelled';
+export type ModerationStatus = 'visible' | 'hidden' | 'reported';
+
+export interface Course {
+  id: string;
+  title: string;
+  description: string;
+  category: MusicCategory;
+  instructor: string;
+  level: MusicLevel;
+  coverImage: string;
+  status: PublishStatus;
+  displayOrder: number;
+}
+
+export interface CourseModule {
+  id: string;
+  courseId: string;
+  name: string;
+  description: string;
+  order: number;
+}
+
 export interface Lesson {
   id: string;
   title: string;
@@ -9,9 +37,14 @@ export interface Lesson {
   description: string;
   category: MusicCategory;
   level: MusicLevel;
-  videoUrl: string; // URL simulada ou embed do YouTube/Vimeo
+  videoUrl: string;
   isFree?: boolean;
   thumbnail: string;
+  courseId?: string;
+  moduleId?: string;
+  order?: number;
+  status?: PublishStatus;
+  complementaryUrl?: string;
 }
 
 export interface EquipmentComment {
@@ -30,6 +63,9 @@ export interface Equipment {
   reviewText: string;
   videoDemoUrl: string;
   comments: EquipmentComment[];
+  brand?: string;
+  model?: string;
+  published?: boolean;
 }
 
 export interface LiveSession {
@@ -38,8 +74,11 @@ export interface LiveSession {
   presenter: string;
   date: string;
   time: string;
-  status: 'scheduled' | 'replay';
+  status: LiveStatus;
   videoUrl?: string;
+  description?: string;
+  coverImage?: string;
+  link?: string;
 }
 
 export interface MarketplaceItem {
@@ -49,6 +88,7 @@ export interface MarketplaceItem {
   price: number;
   description: string;
   thumbnail: string;
+  status?: 'active' | 'inactive';
 }
 
 export interface PostComment {
@@ -66,10 +106,12 @@ export interface CommunityPost {
   authorLevel: string;
   authorAvatar: string;
   content: string;
-  videoUrl?: string; // Simulação de vídeo de evolução
+  videoUrl?: string;
   likes: number;
   comments: PostComment[];
   date: string;
+  reports?: number;
+  moderationStatus?: ModerationStatus;
 }
 
 // 1. AULAS & CATEGORIAS (MOCK DATA DE EXEMPLO COMPLETO)

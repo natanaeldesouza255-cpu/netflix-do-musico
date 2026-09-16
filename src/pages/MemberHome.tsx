@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { CourseCard } from '../components/CourseCard';
-import { lessonsData, MusicCategory } from '../data/mockData';
+import { MusicCategory } from '../data/mockData';
 import { Play, Info, Flame, History, Award, BookOpen, Clock, Heart } from 'lucide-react';
 
 export const MemberHome: React.FC = () => {
-  const { navigateTo, watchedHistory, user } = useApp();
+  const { navigateTo, watchedHistory, publishedLessons, publishedCourses } = useApp();
   const [showHeroDetails, setShowHeroDetails] = useState(false);
 
   // 1. DADOS DAS CATEGORIAS PREMIUM
@@ -45,22 +45,21 @@ export const MemberHome: React.FC = () => {
   // 2. BUSCA AULAS DO HISTÓRICO "CONTINUAR ASSISTINDO"
   const getContinueWatchingLessons = () => {
     return watchedHistory
-      .map(id => lessonsData.find(l => l.id === id))
-      .filter((l): l is typeof lessonsData[0] => !!l);
+      .map(id => publishedLessons.find(l => l.id === id))
+      .filter((l): l is typeof publishedLessons[0] => !!l);
   };
 
   const continueWatching = getContinueWatchingLessons();
 
-  const handleCategoryClick = (category: MusicCategory) => {
-    navigateTo('CategoryPage', { category });
+  const handleCategoryClick = (category: MusicCategory, courseId?: string) => {
+    navigateTo('CategoryPage', { category, courseId });
   };
 
   const handleLessonHistoryClick = (lesson: any) => {
-    navigateTo('CategoryPage', { category: lesson.category, activeLessonId: lesson.id });
+    navigateTo('CategoryPage', { category: lesson.category, courseId: lesson.courseId, activeLessonId: lesson.id });
   };
 
-  // Aula em destaque no Hero: "Mixagem de Metal e Guitarras de Alto Ganho" (id: mix-04)
-  const heroLesson = lessonsData.find(l => l.id === 'mix-04') || lessonsData[0];
+  const heroLesson = publishedLessons.find(l => l.id === 'mix-04') || publishedLessons[0];
 
   return (
     <div className="flex flex-col gap-8 pb-12" id="member-home-root">
@@ -199,8 +198,17 @@ export const MemberHome: React.FC = () => {
 
           <div className="flex flex-col gap-6">
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-              {categoriesList.map((cat) => {
-                const count = lessonsData.filter(l => l.category === cat.name).length;
+              {(publishedCourses.length > 0 ? publishedCourses.map((course) => (
+                  <CourseCard
+                    key={course.id}
+                    categoryName={course.title}
+                    imageUrl={course.coverImage}
+                    lessonCount={publishedLessons.filter(l => l.courseId === course.id).length}
+                    description={course.description}
+                    onClick={() => handleCategoryClick(course.category, course.id)}
+                  />
+                )) : categoriesList.map((cat) => {
+                const count = publishedLessons.filter(l => l.category === cat.name).length;
                 return (
                   <CourseCard
                     key={cat.name}
@@ -211,7 +219,7 @@ export const MemberHome: React.FC = () => {
                     onClick={() => handleCategoryClick(cat.name)}
                   />
                 );
-              })}
+              }))}
             </div>
           </div>
         </section>
