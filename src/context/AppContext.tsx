@@ -216,7 +216,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       hours: '',
       availability: '',
       goal: '',
-      generatedSchedule: null,
+      generatedSchedule: null as any,
     })
   );
 

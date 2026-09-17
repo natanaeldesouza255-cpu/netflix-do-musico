@@ -13,7 +13,7 @@ const emptyCourse = {
   instructor: '',
   level: 'Nível Zero' as MusicLevel,
   coverImage: '',
-  status: 'draft' as const,
+  status: 'draft' as 'draft' | 'published',
   displayOrder: 0,
 };
 

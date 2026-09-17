@@ -7,8 +7,8 @@ export const LoginPage: React.FC = () => {
   const { loginUser, settings } = useApp();
 
   const [isLoginTab, setIsLoginTab] = useState(true);
-  const [email, setEmail] = useState(TEST_ACCOUNTS.student.email);
-  const [password, setPassword] = useState(TEST_ACCOUNTS.student.password);
+  const [email, setEmail] = useState<string>(TEST_ACCOUNTS.student.email);
+  const [password, setPassword] = useState<string>(TEST_ACCOUNTS.student.password);
   const [name, setName] = useState('');
   const [instrument, setInstrument] = useState('Violão');
   const [error, setError] = useState<string | null>(null);
