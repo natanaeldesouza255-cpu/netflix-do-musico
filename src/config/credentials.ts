@@ -1,16 +1,15 @@
 /**
- * Credenciais de teste do protótipo.
- * Futuro (Supabase/Auth): substituir esta lista estática por autenticação real
- * (e-mail/senha, sessão JWT, RLS). NÃO usar este arquivo como segurança de produção.
+ * Credenciais de teste do prot�tipo.
+ * Futuro: substituir por autentica��o real (Supabase/Auth).
  */
 export const TEST_ACCOUNTS = {
   student: {
     email: 'aluno@musico.com',
-    password: 'aluno123',
+    password: '123456',
     label: 'Aluno / Assinante',
   },
   admin: {
-    email: 'admin@musico.com',
+    email: 'natanaeldesouza255@gmail.com',
     password: 'admin123',
     label: 'Administrador',
   },

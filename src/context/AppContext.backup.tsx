@@ -1,4 +1,4 @@
-﻿import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
   Lesson,
   Equipment,
@@ -341,7 +341,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           }
         : { ...defaultStudentProfile };
       if (profile.status === 'inactive') {
-        showToast('error', 'Esta conta de aluno estÃ¡ desativada.');
+        showToast('error', 'Esta conta de aluno está desativada.');
         return false;
       }
       setUser(profile);
@@ -351,7 +351,72 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       showToast('success', 'Login de aluno realizado.');
       return true;
     }
-    showToast('error', 'E-mail ou senha inválidos.');
+
+    if (email.trim() !== '' && password.length >= 6) {
+      if (!settings.allowRegistrations) {
+        showToast('error', 'Cadastros temporariamente desativados.');
+        return false;
+      }
+      const existing = students.find((s) => s.email.toLowerCase() === normalized);
+      if (existing?.status === 'inactive') {
+        showToast('error', 'Esta conta está desativada.');
+        return false;
+      }
+      const profile: StudentProfile = existing
+        ? {
+            id: existing.id,
+            name: existing.name,
+            email: existing.email,
+            avatar: existing.avatar,
+            instrument: existing.instrument,
+            level: existing.level,
+            bio: existing.bio,
+            xp: existing.xp,
+            role: 'student',
+            status: existing.status,
+            subscriptionStatus: existing.subscriptionStatus,
+          }
+        : {
+            id: uid('user'),
+            name: email.split('@')[0].toUpperCase(),
+            email,
+            avatar: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80',
+            instrument: 'Violão & Guitarra',
+            level: 'Nível Zero',
+            bio: 'Novo músico na plataforma.',
+            xp: 0,
+            role: 'student',
+            status: 'active',
+            subscriptionStatus: 'active',
+          };
+      if (!existing) {
+        setStudents((prev) => [
+          {
+            id: profile.id,
+            name: profile.name,
+            email: profile.email,
+            avatar: profile.avatar,
+            instrument: profile.instrument,
+            level: profile.level,
+            bio: profile.bio,
+            xp: profile.xp,
+            role: 'student',
+            status: 'active',
+            subscriptionStatus: 'active',
+            createdAt: new Date().toISOString().slice(0, 10),
+            startedCourseIds: [],
+            completedCourseIds: [],
+          },
+          ...prev,
+        ]);
+        logActivity(`Novo aluno ${profile.name} se cadastrou.`);
+      }
+      setUser(profile);
+      setIsSubscriber(true);
+      setCurrentScreen('MemberHome');
+      setHistoryStack([]);
+      return true;
+    }
     return false;
   };
 
@@ -467,7 +532,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           : post
       )
     );
-    showToast('success', 'DenÃºncia enviada para moderaÃ§Ã£o.');
+    showToast('success', 'Denúncia enviada para moderação.');
   };
 
   const addCommentToEquipment = (eqId: string, rating: number, text: string) => {
@@ -489,15 +554,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const generateStudyCalendar = (routine: string, hours: string, availability: string, goal: string) => {
-    const dias = ['Segunda-feira', 'TerÃ§a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'SÃ¡bado', 'Domingo'];
+    const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
     const hrs = parseInt(hours) || 4;
-    const minDiarios = Math.round((hrs * 60) / (availability.toLowerCase() === 'diÃ¡ria' ? 7 : availability.toLowerCase() === 'finais de semana' ? 2 : 4));
+    const minDiarios = Math.round((hrs * 60) / (availability.toLowerCase() === 'diária' ? 7 : availability.toLowerCase() === 'finais de semana' ? 2 : 4));
     const agenda: any[] = [];
 
     dias.forEach((dia, index) => {
       let treina = false;
-      if (availability.toLowerCase() === 'diÃ¡ria') treina = true;
-      else if (availability.toLowerCase() === 'finais de semana' && (dia === 'SÃ¡bado' || dia === 'Domingo')) treina = true;
+      if (availability.toLowerCase() === 'diária') treina = true;
+      else if (availability.toLowerCase() === 'finais de semana' && (dia === 'Sábado' || dia === 'Domingo')) treina = true;
       else if (availability.toLowerCase() === '3 vezes na semana' && (index === 0 || index === 2 || index === 4)) treina = true;
       else if (availability.toLowerCase() === '4 vezes na semana' && (index === 0 || index === 1 || index === 3 || index === 4)) treina = true;
 
@@ -509,24 +574,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         agenda.push({
           dia,
           estudar: true,
-          foco: index % 2 === 0 ? 'TÃ©cnica e RepertÃ³rio' : 'Teoria e ProduÃ§Ã£o',
+          foco: index % 2 === 0 ? 'Técnica e Repertório' : 'Teoria e Produção',
           tempoTotal: `${minDiarios} min`,
           divisao: [
-            { tarefa: 'Aquecimento e TÃ©cnica Dedos', tempo: `${tempoTec} min` },
+            { tarefa: 'Aquecimento e Técnica Dedos', tempo: `${tempoTec} min` },
             { tarefa: `Estudo de Teoria / Harmonias para ${goal}`, tempo: `${tempoTeo} min` },
-            { tarefa: 'AplicaÃ§Ã£o prÃ¡tica no RepertÃ³rio', tempo: `${tempoRep} min` },
-            { tarefa: 'GravaÃ§Ã£o de evoluÃ§Ã£o ou Improviso', tempo: `${tempoCri} min` },
+            { tarefa: 'Aplicação prática no Repertório', tempo: `${tempoRep} min` },
+            { tarefa: 'Gravação de evolução ou Improviso', tempo: `${tempoCri} min` },
           ],
         });
       } else {
         agenda.push({
           dia,
           estudar: false,
-          foco: 'Descanso e AudiÃ§Ã£o Ativa',
+          foco: 'Descanso e Audição Ativa',
           tempoTotal: '0 min',
           divisao: [
-            { tarefa: 'Ouvir discos novos de referÃªncia', tempo: '15 min' },
-            { tarefa: 'Descanso de articulaÃ§Ãµes e ouvidos', tempo: 'Completo' },
+            { tarefa: 'Ouvir discos novos de referência', tempo: '15 min' },
+            { tarefa: 'Descanso de articulações e ouvidos', tempo: 'Completo' },
           ],
         });
       }
@@ -540,13 +605,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       generatedSchedule: {
         cronograma: agenda,
         metasSemanais: [
-          'Aumentar velocidade de treino em 5 BPM utilizando metrÃ´nomo',
-          'Gravar 1 vÃ­deo de evoluÃ§Ã£o no final de semana para postar na Comunidade',
+          'Aumentar velocidade de treino em 5 BPM utilizando metrônomo',
+          'Gravar 1 vídeo de evolução no final de semana para postar na Comunidade',
           'Concluir pelo menos 2 aulas na categoria escolhida',
         ],
         tempoTreino: `${hrs} horas por semana`,
         frequenciaRecomendada: `${availability}`,
-        dicaIA: `MÃºsico, dado seu objetivo de '${goal}', nossa IA recomenda focar os primeiros 10 minutos de cada sessÃ£o exclusivamente em micro-treinos de tÃ©cnica lenta no metrÃ´nomo para solidificar postura. NÃ£o pule o dia de descanso auditivo!`,
+        dicaIA: `Músico, dado seu objetivo de '${goal}', nossa IA recomenda focar os primeiros 10 minutos de cada sessão exclusivamente em micro-treinos de técnica lenta no metrônomo para solidificar postura. Não pule o dia de descanso auditivo!`,
       },
     });
 
@@ -567,9 +632,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           id,
           title: input.title,
           description: input.description || '',
-          category: (input.category || 'ViolÃ£o') as MusicCategory,
+          category: (input.category || 'Violão') as MusicCategory,
           instructor: input.instructor || 'Instrutor',
-          level: (input.level || 'NÃ­vel Zero') as MusicLevel,
+          level: (input.level || 'Nível Zero') as MusicLevel,
           coverImage: input.coverImage || 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80',
           status: input.status || 'draft',
           displayOrder: input.displayOrder ?? nextOrder,
@@ -586,8 +651,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCourses((prev) => prev.filter((c) => c.id !== courseId));
     setModules((prev) => prev.filter((m) => m.courseId !== courseId));
     setCatalogLessons((prev) => prev.filter((l) => l.courseId !== courseId));
-    logActivity(`Curso "${course?.title || courseId}" foi excluÃ­do.`);
-    showToast('success', 'Curso excluÃ­do.');
+    logActivity(`Curso "${course?.title || courseId}" foi excluído.`);
+    showToast('success', 'Curso excluído.');
   };
 
   const toggleCoursePublish = (courseId: string) => {
@@ -596,7 +661,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         c.id === courseId ? { ...c, status: (c.status === 'published' ? 'draft' : 'published') as PublishStatus } : c
       )
     );
-    showToast('success', 'Status de publicaÃ§Ã£o atualizado.');
+    showToast('success', 'Status de publicação atualizado.');
   };
 
   const saveModule = (input: Partial<CourseModule> & { courseId: string; name: string }) => {
@@ -608,14 +673,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const nextOrder = siblings.reduce((max, m) => Math.max(max, m.order), -1) + 1;
       return [...prev, { id, courseId: input.courseId, name: input.name, description: input.description || '', order: input.order ?? nextOrder }];
     });
-    showToast('success', 'MÃ³dulo salvo.');
+    showToast('success', 'Módulo salvo.');
     return id;
   };
 
   const deleteModule = (moduleId: string) => {
     setModules((prev) => prev.filter((m) => m.id !== moduleId));
     setCatalogLessons((prev) => prev.filter((l) => l.moduleId !== moduleId));
-    showToast('success', 'MÃ³dulo excluÃ­do.');
+    showToast('success', 'Módulo excluído.');
   };
 
   const moveModule = (moduleId: string, direction: 'up' | 'down') => {
@@ -639,8 +704,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         title: input.title,
         duration: input.duration || '10 min',
         description: input.description || '',
-        category: (input.category || course?.category || 'ViolÃ£o') as MusicCategory,
-        level: (input.level || course?.level || 'NÃ­vel Zero') as MusicLevel,
+        category: (input.category || course?.category || 'Violão') as MusicCategory,
+        level: (input.level || course?.level || 'Nível Zero') as MusicLevel,
         videoUrl: input.videoUrl || 'https://www.youtube.com/embed/dQw4w9WgXcQ',
         isFree: input.isFree || false,
         thumbnail: input.thumbnail || course?.coverImage || 'https://images.unsplash.com/photo-1510915361894-db8b60106cb1?auto=format&fit=crop&w=800&q=80',
@@ -662,7 +727,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteLesson = (lessonId: string) => {
     setCatalogLessons((prev) => prev.filter((l) => l.id !== lessonId));
-    showToast('success', 'Aula excluÃ­da.');
+    showToast('success', 'Aula excluída.');
   };
 
   const moveLesson = (lessonId: string, direction: 'up' | 'down') => {
@@ -712,7 +777,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteLive = (liveId: string) => {
     setLives((prev) => prev.filter((l) => l.id !== liveId));
-    showToast('success', 'Live excluÃ­da.');
+    showToast('success', 'Live excluída.');
   };
 
   const saveMarketplaceItem = (input: Partial<MarketplaceItem> & { name: string }) => {
@@ -737,7 +802,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteMarketplaceItem = (itemId: string) => {
     setMarketplaceItems((prev) => prev.filter((i) => i.id !== itemId));
-    showToast('success', 'Produto excluÃ­do.');
+    showToast('success', 'Produto excluído.');
   };
 
   const saveEquipment = (input: Partial<Equipment> & { name: string }) => {
@@ -767,17 +832,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const deleteEquipment = (eqId: string) => {
     setEquipments((prev) => prev.filter((e) => e.id !== eqId));
-    showToast('success', 'Equipamento excluÃ­do.');
+    showToast('success', 'Equipamento excluído.');
   };
 
   const deleteCommunityPost = (postId: string) => {
     setCommunityFeed((prev) => prev.filter((p) => p.id !== postId));
-    showToast('success', 'PublicaÃ§Ã£o removida.');
+    showToast('success', 'Publicação removida.');
   };
 
   const setPostModeration = (postId: string, status: CommunityPost['moderationStatus']) => {
     setCommunityFeed((prev) => prev.map((p) => (p.id === postId ? { ...p, moderationStatus: status } : p)));
-    showToast('success', 'ModeraÃ§Ã£o atualizada.');
+    showToast('success', 'Moderação atualizada.');
   };
 
   const saveStudent = (input: Partial<ManagedUser> & { id?: string }) => {
@@ -800,8 +865,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const saveSettings = (updated: Partial<PlatformSettings>) => {
     setSettings((prev) => ({ ...prev, ...updated }));
-    showToast('success', 'ConfiguraÃ§Ãµes salvas.');
-    logActivity('ConfiguraÃ§Ãµes da plataforma foram atualizadas.');
+    showToast('success', 'Configurações salvas.');
+    logActivity('Configurações da plataforma foram atualizadas.');
   };
 
   return (
@@ -885,4 +950,3 @@ export const useApp = () => {
   }
   return context;
 };
-

@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider, useApp, isAdminScreen } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { ToastHost } from './components/ToastHost';
@@ -26,7 +26,6 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 import { ShieldCheck } from 'lucide-react';
 
 const MainLayout: React.FC = () => {
-  const [adminPreview, setAdminPreview] = React.useState(false);
   const { currentScreen, isSubscriber, navigateTo, user } = useApp();
 
   useEffect(() => {
@@ -34,25 +33,25 @@ const MainLayout: React.FC = () => {
 
     const handleContextMenu = (e: MouseEvent) => {
       e.preventDefault();
-      alert('ðŸ›¡ï¸ Netflix do MÃºsico: Por motivos de seguranÃ§a e proteÃ§Ã£o de direitos autorais de nossos instrutores, o clique direito estÃ¡ desabilitado na Ã¡rea premium.');
+      alert('🛡️ Netflix do Músico: Por motivos de segurança e proteção de direitos autorais de nossos instrutores, o clique direito está desabilitado na área premium.');
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'F12') {
         e.preventDefault();
-        alert('ðŸ›¡ï¸ Acesso de desenvolvedor bloqueado na Ã¡rea de assinantes.');
+        alert('🛡️ Acesso de desenvolvedor bloqueado na área de assinantes.');
       }
       if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
         e.preventDefault();
-        alert('ðŸ›¡ï¸ Ferramentas de inspeÃ§Ã£o bloqueadas para seguranÃ§a do streaming protegido.');
+        alert('🛡️ Ferramentas de inspeção bloqueadas para segurança do streaming protegido.');
       }
       if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
         e.preventDefault();
-        alert('ðŸ›¡ï¸ Criptografia de cÃ³digo fonte ativa.');
+        alert('🛡️ Criptografia de código fonte ativa.');
       }
       if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
         e.preventDefault();
-        alert('ðŸ›¡ï¸ Download offline bloqueado para seguranÃ§a DRM.');
+        alert('🛡️ Download offline bloqueado para segurança DRM.');
       }
     };
 
@@ -94,22 +93,10 @@ const MainLayout: React.FC = () => {
     }
   };
 
-  if (user?.role === 'admin' && isAdminScreen(currentScreen) && !adminPreview) {
+  if (user?.role === 'admin' && isAdminScreen(currentScreen)) {
     return (
       <>
-        <>
-  <AdminLayout>{renderAdminScreen()}</AdminLayout>
-
-  <button
-    onClick={() => {
-      setAdminPreview(true);
-      navigateTo('MemberHome');
-    }}
-    className="fixed bottom-6 right-6 z-[9999] rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 px-5 py-3 text-sm font-bold text-white shadow-2xl hover:scale-105 transition"
-  >
-    👁 Visualizar como aluno
-  </button>
-</>
+        <AdminLayout>{renderAdminScreen()}</AdminLayout>
         <ToastHost />
       </>
     );
@@ -154,18 +141,6 @@ const MainLayout: React.FC = () => {
 
       <div className="z-40">
         <Navbar />
-
-{user?.role === 'admin' && adminPreview && (
-  <button
-    onClick={() => {
-      setAdminPreview(false);
-      navigateTo('AdminDashboard');
-    }}
-    className="fixed top-5 right-5 z-[9999] rounded-xl bg-purple-600 px-5 py-3 text-sm font-bold text-white shadow-2xl hover:bg-purple-500 transition"
-  >
-    ← Voltar ao Admin
-  </button>
-)}
       </div>
 
       <main className="flex-grow z-10 w-full relative">
@@ -176,13 +151,13 @@ const MainLayout: React.FC = () => {
         <div className="mx-auto max-w-7xl flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="text-center md:text-left">
             <div className="font-heading text-base font-extrabold text-zinc-350 flex items-center justify-center md:justify-start gap-1">
-              ðŸŽ¸ NETFLIX DO MÃšSICO
+              🎸 NETFLIX DO MÚSICO
               <span className="text-[9px] border border-zinc-700/60 px-1 py-0.2 rounded font-sans uppercase font-light text-zinc-500 tracking-wider">
                 MVP v0.2
               </span>
             </div>
             <p className="text-[10px] text-zinc-650 mt-1 max-w-xs leading-normal">
-              A maior e mais completa plataforma de ensino e ecossistema digital para mÃºsicos e produtores do Brasil.
+              A maior e mais completa plataforma de ensino e ecossistema digital para músicos e produtores do Brasil.
             </p>
           </div>
 
@@ -196,9 +171,9 @@ const MainLayout: React.FC = () => {
           <div className="flex flex-col items-center md:items-end gap-1.5 text-zinc-650 text-[10px] text-center md:text-right font-medium">
             <div className="flex items-center gap-1 text-cyan-400/80 font-bold uppercase tracking-wider font-mono">
               <ShieldCheck className="h-4 w-4 text-cyan-400" />
-              ConexÃ£o Segura Ativa (DRM & Watermark)
+              Conexão Segura Ativa (DRM & Watermark)
             </div>
-            <span>Â© {new Date().getFullYear()} Netflix do MÃºsico S.A. Todos os direitos reservados.</span>
+            <span>© {new Date().getFullYear()} Netflix do Músico S.A. Todos os direitos reservados.</span>
           </div>
         </div>
       </footer>
@@ -216,4 +191,3 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
