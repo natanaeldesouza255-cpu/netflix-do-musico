@@ -16,7 +16,7 @@ export const AdminEquipment: React.FC = () => {
     <div className="flex flex-col gap-5">
       <div className="flex justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-2xl font-black">Equipamentos</h1>
+          <h1 className="font-heading text-2xl font-black">Reviews de Equipamentos</h1>
           <p className="text-xs text-zinc-500 mt-1">Reviews dos alunos são preservados ao editar o cadastro.</p>
         </div>
         <button onClick={() => setForm({ name: '', type: 'Guitarras', description: '', imageUrl: '', brand: '', model: '', published: true, reviewText: '', videoDemoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ' })} className="bg-purple-600 text-white text-xs font-bold px-4 py-2.5 rounded-lg flex items-center gap-2">
@@ -52,7 +52,7 @@ export const AdminEquipment: React.FC = () => {
           </tbody>
         </table>
       </div>
-      <AdminModal wide open={!!form} title={form?.id ? 'Editar equipamento' : 'Novo equipamento'} onClose={() => setForm(null)}>
+      <AdminModal wide open={!!form} title={form?.id ? 'Editar review de equipamento' : 'Novo review de equipamento'} onClose={() => setForm(null)}>
         {form && (
           <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); saveEquipment(form); setForm(null); }}>
             <Field label="Nome"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
