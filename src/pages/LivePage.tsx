@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { livesData, LiveSession } from '../data/mockData';
+import { LiveSession } from '../data/mockData';
 import { Watermark } from '../components/Watermark';
 import { 
   Radio, 
@@ -23,10 +23,10 @@ interface ChatMessage {
 }
 
 export const LivePage: React.FC = () => {
-  const { user } = useApp();
+  const { user, lives } = useApp();
   const [activeLive, setActiveLive] = useState<LiveSession | null>(
     // Pega o primeiro replay por padrão para simular a visualização de vídeo de live
-    livesData.find(l => l.status === 'replay') || null
+    lives.find(l => l.status === 'replay' || l.status === 'finished') || null
   );
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -38,8 +38,8 @@ export const LivePage: React.FC = () => {
   const [myMessage, setMyMessage] = useState('');
   
   // Agenda e Replays
-  const scheduledLives = livesData.filter(l => l.status === 'scheduled');
-  const replayLives = livesData.filter(l => l.status === 'replay');
+  const scheduledLives = lives.filter(l => l.status === 'scheduled' || l.status === 'live');
+  const replayLives = lives.filter(l => l.status === 'replay' || l.status === 'finished');
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -101,7 +101,7 @@ export const LivePage: React.FC = () => {
   };
 
   const handleSelectLive = (live: LiveSession) => {
-    if (live.status === 'replay') {
+    if (live.status === 'replay' || live.status === 'finished') {
       setActiveLive(live);
     } else {
       alert(`Esta live está agendada para ${live.date} às ${live.time}. Um link de acesso VIP privado será enviado por e-mail para você 15 minutos antes do início!`);
