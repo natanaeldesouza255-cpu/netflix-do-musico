@@ -6,6 +6,7 @@ import { Star, X, MessageSquare, Play, Send, CheckCircle, Award } from 'lucide-r
 
 export const EquipmentReviews: React.FC = () => {
   const { equipments, addCommentToEquipment, screenParams, user } = useApp();
+  const publishedEquipments = equipments.filter((eq) => eq.published !== false);
 
   const [activeFilter, setActiveFilter] = useState<string>('Tudo');
   const [selectedEq, setSelectedEq] = useState<Equipment | null>(null);
@@ -28,13 +29,13 @@ export const EquipmentReviews: React.FC = () => {
 
   // Filtra equipamentos reativamente
   const filteredEquipments = activeFilter === 'Tudo' 
-    ? equipments 
-    : equipments.filter(eq => eq.type === activeFilter);
+    ? publishedEquipments 
+    : publishedEquipments.filter(eq => eq.type === activeFilter);
 
   // Monitora redirecionamento via busca rápida (com activeEqId nos params)
   useEffect(() => {
     if (screenParams?.activeEqId) {
-      const match = equipments.find(e => e.id === screenParams.activeEqId);
+      const match = publishedEquipments.find(e => e.id === screenParams.activeEqId);
       if (match) setSelectedEq(match);
     }
   }, [screenParams, equipments]);
