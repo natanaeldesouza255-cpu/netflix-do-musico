@@ -157,7 +157,7 @@ const MainLayout: React.FC = () => {
       <div className="absolute top-[60vh] right-1/4 translate-x-1/2 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none z-0" />
 
       <div className="z-40">
-        {showStudentNavbar && <Navbar />}
+        {showStudentNavbar && <Navbar forceSubscriberView={user?.role === 'admin' && adminPreview} />}
 
 {user?.role === 'admin' && adminPreview && (
   <button
