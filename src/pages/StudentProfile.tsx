@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { lessonsData, equipmentsData } from '../data/mockData';
+
 import { AICalendar } from '../components/AICalendar';
 import { VideoCard } from '../components/VideoCard';
 import { 
@@ -24,7 +24,9 @@ export const StudentProfile: React.FC = () => {
     favoriteEquipments, 
     communityFeed,
     updateProfile,
-    navigateTo
+    navigateTo,
+    publishedLessons,
+    equipments
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'evolucao' | 'favoritos' | 'calendario'>('evolucao');
@@ -44,13 +46,13 @@ export const StudentProfile: React.FC = () => {
   }
 
   // 1. CALCULOS DE PROGRESSO
-  const totalLessons = lessonsData.length;
+  const totalLessons = publishedLessons.length;
   const completedCount = completedLessons.length;
   const progressPercent = Math.round((completedCount / totalLessons) * 100) || 0;
 
   // 2. BUSCA ITENS FAVORITADOS
-  const favLessonsObj = lessonsData.filter(l => favoriteLessons.includes(l.id));
-  const favEquipsObj = equipmentsData.filter(e => favoriteEquipments.includes(e.id));
+  const favLessonsObj = publishedLessons.filter(l => favoriteLessons.includes(l.id));
+  const favEquipsObj = equipments.filter(e => e.published !== false && favoriteEquipments.includes(e.id));
 
   // 3. BUSCA POSTS DO ALUNO
   const studentPosts = communityFeed.filter(post => post.authorName === user.name);
