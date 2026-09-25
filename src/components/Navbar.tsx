@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp, ScreenName } from '../context/AppContext';
-import { lessonsData, equipmentsData } from '../data/mockData';
 import { 
   Search, 
   Menu, 
@@ -25,7 +24,9 @@ export const Navbar: React.FC = () => {
     navigateTo, 
     logoutUser,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    publishedLessons,
+    equipments
   } = useApp();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,13 +38,13 @@ export const Navbar: React.FC = () => {
     
     const query = searchQuery.toLowerCase();
     
-    const filteredLessons = lessonsData.filter(l => 
+    const filteredLessons = publishedLessons.filter(l => 
       l.title.toLowerCase().includes(query) || 
       l.description.toLowerCase().includes(query) ||
       l.category.toLowerCase().includes(query)
     ).map(l => ({ ...l, type: 'Aulas' as const }));
 
-    const filteredEquips = equipmentsData.filter(e => 
+    const filteredEquips = equipments.filter(e => e.published !== false).filter(e => 
       e.name.toLowerCase().includes(query) || 
       e.description.toLowerCase().includes(query) ||
       e.type.toLowerCase().includes(query)
