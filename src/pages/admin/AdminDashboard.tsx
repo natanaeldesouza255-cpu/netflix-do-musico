@@ -15,14 +15,14 @@ export const AdminDashboard: React.FC = () => {
     { label: 'Aulas', value: catalogLessons.length, icon: Clapperboard, target: 'AdminModulesLessons' as const, hint: `${publishedContent} publicadas` },
     { label: 'Lives', value: lives.length, icon: Radio, target: 'AdminLives' as const, hint: `${lives.filter((l) => l.status === 'scheduled' || l.status === 'live').length} na agenda` },
     { label: 'Assinaturas ativas', value: activeSubs, icon: CheckCircle2, hint: `${students.filter((s) => s.subscriptionStatus === 'cancelled').length} canceladas` },
-    { label: 'Receita do mÃªs (sim.)', value: `R$ ${monthRevenue.toFixed(2).replace('.', ',')}`, icon: Wallet, hint: settings.planName },
+    { label: 'Receita do mês (sim.)', value: `R$ ${monthRevenue.toFixed(2).replace('.', ',')}`, icon: Wallet, hint: settings.planName },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-heading text-2xl font-black text-white">Dashboard</h1>
-        <p className="text-xs text-zinc-500 mt-1">VisÃ£o geral da operaÃ§Ã£o da plataforma (dados simulados / persistidos no navegador).</p>
+        <p className="text-xs text-zinc-500 mt-1">Visão geral da operação da plataforma (dados simulados / persistidos no navegador).</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {cards.map((card) => {
@@ -41,12 +41,12 @@ export const AdminDashboard: React.FC = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="glass-panel border border-zinc-800 rounded-2xl p-5">
-          <h2 className="text-sm font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /> ConteÃºdos publicados</h2>
+          <h2 className="text-sm font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /> Conteúdos publicados</h2>
           <ul className="mt-4 text-xs text-zinc-400 space-y-2">
             <li>Cursos publicados: {courses.filter((c) => c.status === 'published').length}</li>
             <li>Aulas publicadas: {publishedContent}</li>
             <li>Produtos ativos: {marketplaceItems.filter((i) => i.status !== 'inactive').length}</li>
-            <li>Posts visÃ­veis: {communityFeed.filter((p) => p.moderationStatus !== 'hidden').length}</li>
+            <li>Posts visíveis: {communityFeed.filter((p) => p.moderationStatus !== 'hidden').length}</li>
           </ul>
         </div>
         <div className="glass-panel border border-zinc-800 rounded-2xl p-5">
