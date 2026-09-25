@@ -15,7 +15,6 @@ import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminDashboard } from './pages/admin/AdminDashboard';
 import { AdminCourses } from './pages/admin/AdminCourses';
 import { AdminCourseEditor } from './pages/admin/AdminCourseEditor';
-import { AdminModulesLessons } from './pages/admin/AdminModulesLessons';
 import { AdminStudents } from './pages/admin/AdminStudents';
 import { AdminStudentDetail } from './pages/admin/AdminStudentDetail';
 import { AdminFinance } from './pages/admin/AdminFinance';
@@ -74,8 +73,6 @@ const MainLayout: React.FC = () => {
         return <AdminCourses />;
       case 'AdminCourseEditor':
         return <AdminCourseEditor />;
-      case 'AdminModulesLessons':
-        return <AdminModulesLessons />;
       case 'AdminStudents':
         return <AdminStudents />;
       case 'AdminStudentDetail':
@@ -219,6 +216,4 @@ export const App: React.FC = () => {
 };
 
 export default App;
-
-
 

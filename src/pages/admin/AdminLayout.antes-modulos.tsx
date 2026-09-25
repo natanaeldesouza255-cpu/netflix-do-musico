@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useApp, ScreenName } from '../../context/AppContext';
 import {
   LayoutDashboard,
@@ -19,14 +19,14 @@ import {
 const NAV: { label: string; screen: ScreenName; icon: React.ComponentType<{ className?: string }> }[] = [
   { label: 'Dashboard', screen: 'AdminDashboard', icon: LayoutDashboard },
   { label: 'Cursos', screen: 'AdminCourses', icon: BookOpen },
-  { label: 'Conteúdo', screen: 'AdminModulesLessons', icon: Layers },
+  { label: 'Módulos e Aulas', screen: 'AdminCourses', icon: Layers },
   { label: 'Alunos', screen: 'AdminStudents', icon: Users },
   { label: 'Financeiro', screen: 'AdminFinance', icon: Wallet },
   { label: 'Lives', screen: 'AdminLives', icon: Radio },
   { label: 'Comunidade', screen: 'AdminCommunity', icon: MessagesSquare },
   { label: 'Marketplace', screen: 'AdminMarketplace', icon: ShoppingBag },
   { label: 'Equipamentos', screen: 'AdminEquipment', icon: Guitar },
-  { label: 'ConfiguraÃ§Ãµes', screen: 'AdminSettings', icon: Settings },
+  { label: 'Configurações', screen: 'AdminSettings', icon: Settings },
 ];
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -47,9 +47,9 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             const Icon = item.icon;
             const active =
               currentScreen === item.screen ||
-              (item.label === 'MÃ³dulos e Aulas' && currentScreen === 'AdminCourseEditor') ||
+              (item.label === 'Módulos e Aulas' && currentScreen === 'AdminCourseEditor') ||
               (item.label === 'Cursos' && currentScreen === 'AdminCourseEditor' && index === 1);
-            const isModulesShortcut = item.label === 'MÃ³dulos e Aulas';
+            const isModulesShortcut = item.label === 'Módulos e Aulas';
             return (
               <button
                 key={`${item.label}-${index}`}
@@ -95,7 +95,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="text-xs text-zinc-500 hidden sm:block">
-            ProtÃ³tipo administrativo â€” autenticaÃ§Ã£o mock, nÃ£o usar em produÃ§Ã£o.
+            Protótipo administrativo — autenticação mock, não usar em produção.
           </div>
           <div className="text-[10px] font-mono text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-full">
             {user?.role?.toUpperCase()}
@@ -106,6 +106,3 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
     </div>
   );
 };
-
-
-

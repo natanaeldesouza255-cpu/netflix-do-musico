@@ -12,7 +12,7 @@ export const AdminDashboard: React.FC = () => {
   const cards = [
     { label: 'Alunos', value: students.length, icon: Users, target: 'AdminStudents' as const, hint: `${activeStudents} ativos` },
     { label: 'Cursos', value: courses.length, icon: BookOpen, target: 'AdminCourses' as const, hint: `${courses.filter((c) => c.status === 'published').length} publicados` },
-    { label: 'Aulas', value: catalogLessons.length, icon: Clapperboard, target: 'AdminModulesLessons' as const, hint: `${publishedContent} publicadas` },
+    { label: 'Aulas', value: catalogLessons.length, icon: Clapperboard, target: null, hint: `${publishedContent} publicadas` },
     { label: 'Lives', value: lives.length, icon: Radio, target: 'AdminLives' as const, hint: `${lives.filter((l) => l.status === 'scheduled' || l.status === 'live').length} na agenda` },
     { label: 'Assinaturas ativas', value: activeSubs, icon: CheckCircle2, hint: `${students.filter((s) => s.subscriptionStatus === 'cancelled').length} canceladas` },
     { label: 'Receita do mÃªs (sim.)', value: `R$ ${monthRevenue.toFixed(2).replace('.', ',')}`, icon: Wallet, hint: settings.planName },
@@ -65,5 +65,4 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-
 

@@ -1,34 +1,34 @@
-﻿import React from 'react';
+import React from 'react';
 import { useApp } from '../../context/AppContext';
 import { Users, BookOpen, Clapperboard, Radio, Wallet, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export const AdminDashboard: React.FC = () => {
-  const { students, courses, catalogLessons, lives, payments, communityFeed, marketplaceItems, activities, settings, navigateTo } = useApp();
+  const { students, courses, catalogLessons, lives, payments, communityFeed, marketplaceItems, activities, settings } = useApp();
   const activeStudents = students.filter((s) => s.status === 'active').length;
   const activeSubs = students.filter((s) => s.subscriptionStatus === 'active').length;
   const publishedContent = catalogLessons.filter((l) => (l.status ?? 'published') === 'published').length;
   const monthRevenue = payments.filter((p) => p.status === 'paid' && (p.paidAt || '').startsWith('2026-09')).reduce((a, p) => a + p.amount, 0);
 
   const cards = [
-    { label: 'Alunos', value: students.length, icon: Users, target: 'AdminStudents' as const, hint: `${activeStudents} ativos` },
-    { label: 'Cursos', value: courses.length, icon: BookOpen, target: 'AdminCourses' as const, hint: `${courses.filter((c) => c.status === 'published').length} publicados` },
-    { label: 'Aulas', value: catalogLessons.length, icon: Clapperboard, target: 'AdminModulesLessons' as const, hint: `${publishedContent} publicadas` },
-    { label: 'Lives', value: lives.length, icon: Radio, target: 'AdminLives' as const, hint: `${lives.filter((l) => l.status === 'scheduled' || l.status === 'live').length} na agenda` },
+    { label: 'Alunos', value: students.length, icon: Users, hint: `${activeStudents} ativos` },
+    { label: 'Cursos', value: courses.length, icon: BookOpen, hint: `${courses.filter((c) => c.status === 'published').length} publicados` },
+    { label: 'Aulas', value: catalogLessons.length, icon: Clapperboard, hint: `${publishedContent} publicadas` },
+    { label: 'Lives', value: lives.length, icon: Radio, hint: `${lives.filter((l) => l.status === 'scheduled' || l.status === 'live').length} na agenda` },
     { label: 'Assinaturas ativas', value: activeSubs, icon: CheckCircle2, hint: `${students.filter((s) => s.subscriptionStatus === 'cancelled').length} canceladas` },
-    { label: 'Receita do mÃªs (sim.)', value: `R$ ${monthRevenue.toFixed(2).replace('.', ',')}`, icon: Wallet, hint: settings.planName },
+    { label: 'Receita do mês (sim.)', value: `R$ ${monthRevenue.toFixed(2).replace('.', ',')}`, icon: Wallet, hint: settings.planName },
   ];
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-heading text-2xl font-black text-white">Dashboard</h1>
-        <p className="text-xs text-zinc-500 mt-1">VisÃ£o geral da operaÃ§Ã£o da plataforma (dados simulados / persistidos no navegador).</p>
+        <p className="text-xs text-zinc-500 mt-1">Visão geral da operação da plataforma (dados simulados / persistidos no navegador).</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
         {cards.map((card) => {
           const Icon = card.icon;
           return (
-            <div key={card.label} onClick={() => card.target && navigateTo(card.target)} className={`glass-panel border border-zinc-800 rounded-2xl p-5 transition-all ${card.target ? "cursor-pointer hover:border-purple-500/60 hover:-translate-y-1 hover:shadow-lg hover:shadow-purple-500/10" : ""}`}>
+            <div key={card.label} className="glass-panel border border-zinc-800 rounded-2xl p-5">
               <div className="flex items-center justify-between">
                 <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">{card.label}</span>
                 <Icon className="h-4 w-4 text-purple-400" />
@@ -41,12 +41,12 @@ export const AdminDashboard: React.FC = () => {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="glass-panel border border-zinc-800 rounded-2xl p-5">
-          <h2 className="text-sm font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /> ConteÃºdos publicados</h2>
+          <h2 className="text-sm font-bold flex items-center gap-2"><Sparkles className="h-4 w-4 text-cyan-400" /> Conteúdos publicados</h2>
           <ul className="mt-4 text-xs text-zinc-400 space-y-2">
             <li>Cursos publicados: {courses.filter((c) => c.status === 'published').length}</li>
             <li>Aulas publicadas: {publishedContent}</li>
             <li>Produtos ativos: {marketplaceItems.filter((i) => i.status !== 'inactive').length}</li>
-            <li>Posts visÃ­veis: {communityFeed.filter((p) => p.moderationStatus !== 'hidden').length}</li>
+            <li>Posts visíveis: {communityFeed.filter((p) => p.moderationStatus !== 'hidden').length}</li>
           </ul>
         </div>
         <div className="glass-panel border border-zinc-800 rounded-2xl p-5">
@@ -65,5 +65,3 @@ export const AdminDashboard: React.FC = () => {
     </div>
   );
 };
-
-

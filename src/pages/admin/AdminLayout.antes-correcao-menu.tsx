@@ -19,7 +19,7 @@ import {
 const NAV: { label: string; screen: ScreenName; icon: React.ComponentType<{ className?: string }> }[] = [
   { label: 'Dashboard', screen: 'AdminDashboard', icon: LayoutDashboard },
   { label: 'Cursos', screen: 'AdminCourses', icon: BookOpen },
-  { label: 'Conteúdo', screen: 'AdminModulesLessons', icon: Layers },
+  { label: 'MÃ³dulos e Aulas', screen: 'AdminCourses', icon: Layers },
   { label: 'Alunos', screen: 'AdminStudents', icon: Users },
   { label: 'Financeiro', screen: 'AdminFinance', icon: Wallet },
   { label: 'Lives', screen: 'AdminLives', icon: Radio },

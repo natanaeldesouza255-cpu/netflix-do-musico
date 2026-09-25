@@ -59,7 +59,6 @@ export type ScreenName =
   | 'MarketplacePage'
   | 'AdminDashboard'
   | 'AdminCourses'
-  | 'AdminModulesLessons'
   | 'AdminCourseEditor'
   | 'AdminStudents'
   | 'AdminStudentDetail'
@@ -73,7 +72,6 @@ export type ScreenName =
 export const ADMIN_SCREENS: ScreenName[] = [
   'AdminDashboard',
   'AdminCourses',
-  'AdminModulesLessons',
   'AdminCourseEditor',
   'AdminStudents',
   'AdminStudentDetail',
@@ -887,5 +885,4 @@ export const useApp = () => {
   }
   return context;
 };
-
 
