@@ -2,6 +2,10 @@ import React, { useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { PaymentStatus } from '../../data/mockData';
 
+const STATUS_LABELS: Record<string, string> = {
+  paid: 'Pago', pending: 'Pendente', overdue: 'Em atraso', cancelled: 'Cancelado',
+};
+
 export const AdminFinance: React.FC = () => {
   const { payments, students, settings } = useApp();
   const [status, setStatus] = useState<'all' | PaymentStatus>('all');
@@ -53,7 +57,7 @@ export const AdminFinance: React.FC = () => {
       <div className="flex flex-wrap gap-2">
         {(['all', 'paid', 'pending', 'overdue', 'cancelled'] as const).map((s) => (
           <button key={s} onClick={() => setStatus(s)} className={`text-[11px] px-3 py-1.5 rounded-full border ${status === s ? 'border-purple-500 text-purple-300' : 'border-zinc-800 text-zinc-400'}`}>
-            {s === 'all' ? 'Todos status' : s}
+            {s === 'all' ? 'Todos os status' : STATUS_LABELS[s]}
           </button>
         ))}
         {(['all', 'month', 'prev'] as const).map((p) => (
@@ -84,7 +88,7 @@ export const AdminFinance: React.FC = () => {
                 </td>
                 <td className="p-3">{p.plan}</td>
                 <td className="p-3 font-mono">R$ {p.amount.toFixed(2).replace('.', ',')}</td>
-                <td className="p-3 capitalize">{p.status}</td>
+                <td className="p-3">{STATUS_LABELS[p.status] || p.status}</td>
                 <td className="p-3">{p.paidAt || '—'}</td>
                 <td className="p-3">{p.dueDate}</td>
               </tr>
