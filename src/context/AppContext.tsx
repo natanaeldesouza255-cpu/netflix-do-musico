@@ -265,10 +265,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [toast]);
 
   useEffect(() => {
-    if (user?.role === 'admin' && !isAdminScreen(currentScreen)) {
-      setCurrentScreen('AdminDashboard');
-      setScreenParams(null);
-    }
     if (user?.role === 'student' && isAdminScreen(currentScreen)) {
       setCurrentScreen('MemberHome');
       setScreenParams(null);
