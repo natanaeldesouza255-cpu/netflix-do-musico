@@ -17,6 +17,10 @@ const empty: Partial<LiveSession> & { title: string } = {
   videoUrl: '',
 };
 
+const LIVE_STATUS_LABELS: Record<string, string> = {
+  scheduled: 'Agendada', live: 'Ao vivo', finished: 'Finalizada', replay: 'Replay',
+};
+
 export const AdminLives: React.FC = () => {
   const { lives, saveLive, deleteLive } = useApp();
   const [form, setForm] = useState<(typeof empty & { id?: string }) | null>(null);
@@ -39,7 +43,7 @@ export const AdminLives: React.FC = () => {
           <div key={live.id} className="glass-panel border border-zinc-800 rounded-2xl overflow-hidden">
             {live.coverImage && <img src={live.coverImage} alt="" className="h-32 w-full object-cover" />}
             <div className="p-4">
-              <div className="text-[10px] uppercase text-cyan-400 font-bold">{live.status}</div>
+              <div className="text-[10px] uppercase text-cyan-400 font-bold">{LIVE_STATUS_LABELS[live.status] || live.status}</div>
               <h3 className="text-sm font-bold mt-1">{live.title}</h3>
               <p className="text-xs text-zinc-500 mt-1">{live.presenter} • {live.date} • {live.time}</p>
               <div className="flex gap-2 mt-3">
