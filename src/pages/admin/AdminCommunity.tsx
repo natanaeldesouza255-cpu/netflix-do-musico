@@ -3,6 +3,10 @@ import { useApp } from '../../context/AppContext';
 import { CommunityPost } from '../../data/mockData';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
 
+const MODERATION_LABELS: Record<string, string> = {
+  visible: 'Visível', hidden: 'Oculto', reported: 'Denunciado',
+};
+
 export const AdminCommunity: React.FC = () => {
   const { communityFeed, deleteCommunityPost, setPostModeration } = useApp();
   const [pending, setPending] = useState<CommunityPost | null>(null);
@@ -23,7 +27,7 @@ export const AdminCommunity: React.FC = () => {
                 <div className="text-[11px] text-zinc-500">{post.date} • {post.authorInstrument}</div>
               </div>
               <div className="flex items-center gap-2 text-[10px]">
-                <span className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">{post.moderationStatus || 'visible'}</span>
+                <span className="px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">{MODERATION_LABELS[post.moderationStatus || 'visible']}</span>
                 <span className="text-red-400">{post.reports || 0} denúncias</span>
               </div>
             </div>
