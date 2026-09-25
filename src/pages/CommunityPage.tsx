@@ -5,6 +5,7 @@ import { Users, Send, Video, Sparkles, AlertCircle } from 'lucide-react';
 
 export const CommunityPage: React.FC = () => {
   const { communityFeed, createNewPost, user } = useApp();
+  const visibleCommunityFeed = communityFeed.filter((post) => (post.moderationStatus || 'visible') === 'visible');
   
   const [postContent, setPostContent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
@@ -124,8 +125,8 @@ export const CommunityPage: React.FC = () => {
 
       {/* FEED DE POSTAGENS */}
       <div className="flex flex-col gap-5">
-        {communityFeed.length > 0 ? (
-          communityFeed.map(post => (
+        {visibleCommunityFeed.length > 0 ? (
+          visibleCommunityFeed.map(post => (
             <CommunityPost 
               key={post.id} 
               post={post} 
