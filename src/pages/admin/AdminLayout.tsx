@@ -16,18 +16,18 @@ import {
   X,
 } from 'lucide-react';
 
-const NAV: { label: string; screen: ScreenName; icon: React.ComponentType<{ className?: string }> }[] = [
-  { label: 'Dashboard', screen: 'AdminDashboard', icon: LayoutDashboard },
-  { label: 'Cursos', screen: 'AdminCourses', icon: BookOpen },
-  { label: 'Conteúdo', screen: 'AdminModulesLessons', icon: Layers },
-  { label: 'Alunos', screen: 'AdminStudents', icon: Users },
-  { label: 'Financeiro', screen: 'AdminFinance', icon: Wallet },
-  { label: 'Lives', screen: 'AdminLives', icon: Radio },
-  { label: 'Comunidade', screen: 'AdminCommunity', icon: MessagesSquare },
-  { label: 'Marketplace', screen: 'AdminMarketplace', icon: ShoppingBag },
-  { label: 'Equipamentos', screen: 'AdminEquipment', icon: Guitar },
-  { label: 'ConfiguraÃ§Ãµes', screen: 'AdminSettings', icon: Settings },
-];
+const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  dashboard: LayoutDashboard,
+  courses: BookOpen,
+  content: Layers,
+  students: Users,
+  finance: Wallet,
+  lives: Radio,
+  community: MessagesSquare,
+  marketplace: ShoppingBag,
+  equipment: Guitar,
+  settings: Settings,
+};
 
 export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, currentScreen, navigateTo, logoutUser, settings } = useApp();
@@ -43,26 +43,24 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
           </div>
         </div>
         <nav className="p-3 flex flex-col gap-1">
-          {NAV.map((item, index) => {
-            const Icon = item.icon;
-            const active =
-              currentScreen === item.screen ||
-              (item.label === 'MÃ³dulos e Aulas' && currentScreen === 'AdminCourseEditor') ||
-              (item.label === 'Cursos' && currentScreen === 'AdminCourseEditor' && index === 1);
-            const isModulesShortcut = item.label === 'MÃ³dulos e Aulas';
+          {[...(settings.adminMenu || [])]
+            .filter((item) => item.visible)
+            .sort((a, b) => a.order - b.order)
+            .map((item) => {
+            const Icon = ICONS[item.id] || Settings;
+            const screen = item.screen as ScreenName;
+            const active = currentScreen === screen || (item.id === 'content' && currentScreen === 'AdminCourseEditor');
             return (
               <button
-                key={`${item.label}-${index}`}
+                key={item.id}
                 onClick={() => {
-                  navigateTo(item.screen);
+                  navigateTo(screen);
                   setOpen(false);
                 }}
                 className={`flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-left transition ${
-                  active && !isModulesShortcut
+                  active
                     ? 'bg-purple-500/15 text-purple-300 border border-purple-500/20'
-                    : currentScreen === 'AdminCourseEditor' && isModulesShortcut
-                      ? 'bg-purple-500/15 text-purple-300 border border-purple-500/20'
-                      : 'text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent'
+                    : 'text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent'
                 }`}
               >
                 <Icon className="h-4 w-4" />
@@ -95,7 +93,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="text-xs text-zinc-500 hidden sm:block">
-            ProtÃ³tipo administrativo â€” autenticaÃ§Ã£o mock, nÃ£o usar em produÃ§Ã£o.
+            Protótipo administrativo — autenticação mock, não usar em produção.
           </div>
           <div className="text-[10px] font-mono text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-full">
             {user?.role?.toUpperCase()}
