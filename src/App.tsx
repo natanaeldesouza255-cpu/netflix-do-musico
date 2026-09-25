@@ -29,6 +29,7 @@ import { ShieldCheck } from 'lucide-react';
 const MainLayout: React.FC = () => {
   const [adminPreview, setAdminPreview] = React.useState(false);
   const { currentScreen, isSubscriber, navigateTo, user } = useApp();
+  const showStudentNavbar = isSubscriber || (user?.role === 'admin' && adminPreview);
 
   useEffect(() => {
     if (!isSubscriber) return;
@@ -156,7 +157,7 @@ const MainLayout: React.FC = () => {
       <div className="absolute top-[60vh] right-1/4 translate-x-1/2 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none z-0" />
 
       <div className="z-40">
-        <Navbar />
+        {showStudentNavbar && <Navbar />}
 
 {user?.role === 'admin' && adminPreview && (
   <button
