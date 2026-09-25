@@ -282,12 +282,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const publishedLessons = useMemo(() => {
     const publishedIds = new Set(publishedCourses.map((c) => c.id));
+    const validModuleIds = new Set(modules.filter((m) => publishedIds.has(m.courseId)).map((m) => m.id));
     return catalogLessons.filter(
       (lesson) =>
         (lesson.status ?? 'published') === 'published' &&
-        (!lesson.courseId || publishedIds.has(lesson.courseId))
+        (!lesson.courseId || publishedIds.has(lesson.courseId)) &&
+        (!lesson.moduleId || validModuleIds.has(lesson.moduleId))
     );
-  }, [catalogLessons, publishedCourses]);
+  }, [catalogLessons, publishedCourses, modules]);
 
   const navigateTo = (screen: ScreenName, params: any = null) => {
     if (user?.role === 'student' && isAdminScreen(screen)) {
