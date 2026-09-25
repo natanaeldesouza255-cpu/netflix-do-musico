@@ -28,7 +28,8 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
     searchQuery,
     setSearchQuery,
     publishedLessons,
-    equipments
+    equipments,
+    settings
   } = useApp();
 
   const showSubscriberUi = isSubscriber || forceSubscriberView;
@@ -70,13 +71,16 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
     }
   };
 
+  const adminVisibility = new Map((settings.adminMenu || []).map((item) => [item.id, item.visible]));
+  const isEnabled = (id: string) => adminVisibility.get(id) !== false;
+
   const navItems = [
     { label: 'Início', screen: 'MemberHome' as const, icon: Compass },
     { label: 'Aulas', screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
-    { label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users },
-    { label: 'Lives', screen: 'LivePage' as const, icon: Radio },
-    { label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag },
-    { label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award },
+    ...(isEnabled('community') ? [{ label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users }] : []),
+    ...(isEnabled('lives') ? [{ label: 'Lives', screen: 'LivePage' as const, icon: Radio }] : []),
+    ...(isEnabled('marketplace') ? [{ label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag }] : []),
+    ...(isEnabled('equipment') ? [{ label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award }] : []),
     { label: 'Evolução', screen: 'StudentProfile' as const, icon: TrendingUp }
   ];
 
