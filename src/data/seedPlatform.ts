@@ -44,6 +44,14 @@ export interface PaymentRecord {
   dueDate: string;
 }
 
+export interface AdminMenuItem {
+  id: string;
+  label: string;
+  screen: string;
+  visible: boolean;
+  order: number;
+}
+
 export interface PlatformSettings {
   platformName: string;
   tagline: string;
@@ -52,6 +60,7 @@ export interface PlatformSettings {
   planPrice: number;
   maintenanceMode: boolean;
   allowRegistrations: boolean;
+  adminMenu: AdminMenuItem[];
 }
 
 export interface ActivityLog {
@@ -159,6 +168,18 @@ export const defaultSettings: PlatformSettings = {
   planPrice: 47.9,
   maintenanceMode: false,
   allowRegistrations: true,
+  adminMenu: [
+    { id: 'dashboard', label: 'Dashboard', screen: 'AdminDashboard', visible: true, order: 0 },
+    { id: 'courses', label: 'Cursos', screen: 'AdminCourses', visible: true, order: 1 },
+    { id: 'content', label: 'Conteúdo', screen: 'AdminModulesLessons', visible: true, order: 2 },
+    { id: 'students', label: 'Alunos', screen: 'AdminStudents', visible: true, order: 3 },
+    { id: 'finance', label: 'Financeiro', screen: 'AdminFinance', visible: true, order: 4 },
+    { id: 'lives', label: 'Lives', screen: 'AdminLives', visible: true, order: 5 },
+    { id: 'community', label: 'Comunidade', screen: 'AdminCommunity', visible: true, order: 6 },
+    { id: 'marketplace', label: 'Marketplace', screen: 'AdminMarketplace', visible: true, order: 7 },
+    { id: 'equipment', label: 'Reviews de Equipamentos', screen: 'AdminEquipment', visible: true, order: 8 },
+    { id: 'settings', label: 'Configurações', screen: 'AdminSettings', visible: true, order: 9 },
+  ],
 };
 
 export const seedStudents: ManagedUser[] = [

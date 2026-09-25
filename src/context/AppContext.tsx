@@ -208,7 +208,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [marketplaceItems, setMarketplaceItems] = useState<MarketplaceItem[]>(() => loadJSON('marketplaceItems', seedMarketplace));
   const [students, setStudents] = useState<ManagedUser[]>(() => loadJSON('students', seedStudents));
   const [payments, setPayments] = useState<PaymentRecord[]>(() => loadJSON('payments', seedPayments));
-  const [settings, setSettings] = useState<PlatformSettings>(() => loadJSON('settings', defaultSettings));
+  const [settings, setSettings] = useState<PlatformSettings>(() => {
+    const saved = loadJSON<Partial<PlatformSettings>>('settings', defaultSettings);
+    return { ...defaultSettings, ...saved, adminMenu: saved.adminMenu || defaultSettings.adminMenu };
+  });
   const [activities, setActivities] = useState<ActivityLog[]>(() => loadJSON('activities', seedActivities));
   const [searchQuery, setSearchQuery] = useState('');
   const [toast, setToast] = useState<ToastState | null>(null);
