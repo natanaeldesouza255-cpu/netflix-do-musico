@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { lessonsData, Lesson, MusicCategory, MusicLevel } from '../data/mockData';
+import { Lesson, MusicCategory, MusicLevel } from '../data/mockData';
 import { EpisodeCard } from '../components/EpisodeCard';
 import { Watermark } from '../components/Watermark';
 import { 
@@ -27,13 +27,14 @@ export const CategoryPage: React.FC = () => {
     favoriteLessons, 
     completedLessons,
     toggleLessonFavorite,
-    toggleLessonComplete 
+    toggleLessonComplete,
+    publishedLessons
   } = useApp();
 
   const activeCategory: MusicCategory = screenParams?.category || 'Violão';
 
   // 1. FILTRAGEM DE AULAS DA CATEGORIA
-  const categoryLessons = lessonsData.filter(l => l.category === activeCategory);
+  const categoryLessons = publishedLessons.filter(l => l.category === activeCategory);
 
   // 2. CONTROLE DE NÍVEL (TEMPORADA) ATIVO
   const levelsOrder: MusicLevel[] = ['Nível Zero', 'Aprendiz', 'Mediano', 'Profissional', 'Avançado'];
@@ -41,7 +42,7 @@ export const CategoryPage: React.FC = () => {
   // Decide qual nível selecionar por padrão: se houver aula ativa no params, pega o dela. Senão o primeiro nível disponível com aulas.
   const [activeLevel, setActiveLevel] = useState<MusicLevel>(() => {
     if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
+      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
       if (match) return match.level;
     }
     // Procura primeiro nível que tem aula
@@ -57,7 +58,7 @@ export const CategoryPage: React.FC = () => {
   // 3. CONTROLE DE AULA ATIVA (EPISÓDIO ATIVO)
   const [activeLesson, setActiveLesson] = useState<Lesson>(() => {
     if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
+      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
       if (match) return match;
     }
     return levelLessons[0] || categoryLessons[0];
@@ -66,7 +67,7 @@ export const CategoryPage: React.FC = () => {
   // Atualiza a aula ativa se os parâmetros mudarem (ex: busca rápida clicada)
   useEffect(() => {
     if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
+      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
       if (match) {
         setActiveLesson(match);
         setActiveLevel(match.level);

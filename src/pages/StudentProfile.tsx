@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { lessonsData, equipmentsData } from '../data/mockData';
+
 import { AICalendar } from '../components/AICalendar';
 import { VideoCard } from '../components/VideoCard';
 import { 
@@ -24,7 +24,9 @@ export const StudentProfile: React.FC = () => {
     favoriteEquipments, 
     communityFeed,
     updateProfile,
-    navigateTo
+    navigateTo,
+    publishedLessons,
+    equipments
   } = useApp();
 
   const [activeTab, setActiveTab] = useState<'evolucao' | 'favoritos' | 'calendario'>('evolucao');
@@ -44,13 +46,14 @@ export const StudentProfile: React.FC = () => {
   }
 
   // 1. CALCULOS DE PROGRESSO
-  const totalLessons = lessonsData.length;
-  const completedCount = completedLessons.length;
+  const totalLessons = publishedLessons.length;
+  const completedCount = publishedLessons.filter(l => completedLessons.includes(l.id)).length;
   const progressPercent = Math.round((completedCount / totalLessons) * 100) || 0;
 
   // 2. BUSCA ITENS FAVORITADOS
-  const favLessonsObj = lessonsData.filter(l => favoriteLessons.includes(l.id));
-  const favEquipsObj = equipmentsData.filter(e => favoriteEquipments.includes(e.id));
+  const favLessonsObj = publishedLessons.filter(l => favoriteLessons.includes(l.id));
+  const favEquipsObj = equipments.filter(e => e.published !== false && favoriteEquipments.includes(e.id));
+  const visibleFavoriteCount = favLessonsObj.length + favEquipsObj.length;
 
   // 3. BUSCA POSTS DO ALUNO
   const studentPosts = communityFeed.filter(post => post.authorName === user.name);
@@ -198,7 +201,7 @@ export const StudentProfile: React.FC = () => {
         <div className="glass-panel border border-zinc-800 rounded-xl p-4 flex items-center justify-between gap-4">
           <div className="text-left">
             <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest block">Favoritos salvos</span>
-            <span className="text-2xl font-black text-white font-mono mt-1 block">{favoriteLessons.length + favoriteEquipments.length}</span>
+            <span className="text-2xl font-black text-white font-mono mt-1 block">{visibleFavoriteCount}</span>
             <span className="text-[9px] text-zinc-500 leading-none">Itens guardados</span>
           </div>
           <div className="h-9 w-9 bg-red-500/10 border border-red-500/20 text-red-500 flex items-center justify-center rounded-lg">
@@ -248,7 +251,7 @@ export const StudentProfile: React.FC = () => {
             id="tab-btn-favorites"
           >
             <Heart className="h-4 w-4" />
-            Favoritos Salvos ({favoriteLessons.length + favoriteEquipments.length})
+            Favoritos Salvos ({visibleFavoriteCount})
           </button>
 
           <button

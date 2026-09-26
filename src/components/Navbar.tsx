@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useApp, ScreenName } from '../context/AppContext';
-import { lessonsData, equipmentsData } from '../data/mockData';
 import { 
   Search, 
   Menu, 
@@ -17,7 +16,9 @@ import {
   Zap
 } from 'lucide-react';
 
-export const Navbar: React.FC = () => {
+interface NavbarProps { forceSubscriberView?: boolean; }
+
+export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) => {
   const { 
     user, 
     isSubscriber, 
@@ -25,8 +26,13 @@ export const Navbar: React.FC = () => {
     navigateTo, 
     logoutUser,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    publishedLessons,
+    equipments,
+    settings
   } = useApp();
+
+  const showSubscriberUi = isSubscriber || forceSubscriberView;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -37,13 +43,13 @@ export const Navbar: React.FC = () => {
     
     const query = searchQuery.toLowerCase();
     
-    const filteredLessons = lessonsData.filter(l => 
+    const filteredLessons = publishedLessons.filter(l => 
       l.title.toLowerCase().includes(query) || 
       l.description.toLowerCase().includes(query) ||
       l.category.toLowerCase().includes(query)
     ).map(l => ({ ...l, type: 'Aulas' as const }));
 
-    const filteredEquips = equipmentsData.filter(e => 
+    const filteredEquips = equipments.filter(e => e.published !== false).filter(e => 
       e.name.toLowerCase().includes(query) || 
       e.description.toLowerCase().includes(query) ||
       e.type.toLowerCase().includes(query)
@@ -65,13 +71,16 @@ export const Navbar: React.FC = () => {
     }
   };
 
+  const adminVisibility = new Map((settings.adminMenu || []).map((item) => [item.id, item.visible]));
+  const isEnabled = (id: string) => adminVisibility.get(id) !== false;
+
   const navItems = [
     { label: 'Início', screen: 'MemberHome' as const, icon: Compass },
     { label: 'Aulas', screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
-    { label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users },
-    { label: 'Lives', screen: 'LivePage' as const, icon: Radio },
-    { label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag },
-    { label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award },
+    ...(isEnabled('community') ? [{ label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users }] : []),
+    ...(isEnabled('lives') ? [{ label: 'Lives', screen: 'LivePage' as const, icon: Radio }] : []),
+    ...(isEnabled('marketplace') ? [{ label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag }] : []),
+    ...(isEnabled('equipment') ? [{ label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award }] : []),
     { label: 'Evolução', screen: 'StudentProfile' as const, icon: TrendingUp }
   ];
 
@@ -81,7 +90,7 @@ export const Navbar: React.FC = () => {
         
         {/* LOGO */}
         <button 
-          onClick={() => navigateTo(isSubscriber ? 'MemberHome' : 'PublicHome')}
+          onClick={() => navigateTo(showSubscriberUi ? 'MemberHome' : 'PublicHome')}
           className="flex items-center gap-2 font-heading text-lg sm:text-2xl font-extrabold tracking-tight text-white focus:outline-none"
         >
           <span className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
@@ -93,7 +102,7 @@ export const Navbar: React.FC = () => {
         </button>
 
         {/* BUSCA GLOBAL */}
-        {isSubscriber && (
+        {showSubscriberUi && (
           <div className="relative hidden md:block w-72 lg:w-96">
             <div className="relative">
               <input
@@ -141,7 +150,7 @@ export const Navbar: React.FC = () => {
 
         {/* MENU DESKTOP */}
         <div className="hidden lg:flex items-center gap-6">
-          {isSubscriber ? (
+          {showSubscriberUi ? (
             <>
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -214,7 +223,7 @@ export const Navbar: React.FC = () => {
 
         {/* BOTÃO MOBILE */}
         <div className="flex items-center gap-3 lg:hidden">
-          {isSubscriber && (
+          {showSubscriberUi && (
             <div className="flex items-center gap-1.5 text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">
               <Zap className="h-3 w-3 fill-purple-400 animate-pulse" />
               {user?.xp} XP
@@ -235,7 +244,7 @@ export const Navbar: React.FC = () => {
         <div className="lg:hidden w-full glass-panel mt-4 rounded-xl border border-zinc-800/80 p-4 shadow-2xl flex flex-col gap-4 animate-fade-in">
           
           {/* BUSCA MOBILE */}
-          {isSubscriber && (
+          {showSubscriberUi && (
             <div className="relative w-full">
               <input
                 type="text"
@@ -275,7 +284,7 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {isSubscriber ? (
+          {showSubscriberUi ? (
             <div className="flex flex-col gap-3">
               {navItems.map((item) => {
                 const Icon = item.icon;

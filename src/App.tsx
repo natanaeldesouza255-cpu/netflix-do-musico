@@ -25,10 +25,27 @@ import { AdminMarketplace } from './pages/admin/AdminMarketplace';
 import { AdminEquipment } from './pages/admin/AdminEquipment';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { ShieldCheck } from 'lucide-react';
+import { isSupabaseConfigured, supabase } from './lib/supabase';
 
 const MainLayout: React.FC = () => {
   const [adminPreview, setAdminPreview] = React.useState(false);
   const { currentScreen, isSubscriber, navigateTo, user } = useApp();
+  const showStudentNavbar = isSubscriber || (user?.role === 'admin' && adminPreview);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.warn('[Supabase] Configuração local não encontrada.');
+      return;
+    }
+
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) {
+        console.error('[Supabase] Falha no teste de conexão:', error.message);
+        return;
+      }
+      console.info('[Supabase] Conexão com a API confirmada.');
+    });
+  }, []);
 
   useEffect(() => {
     if (!isSubscriber) return;
@@ -156,7 +173,7 @@ const MainLayout: React.FC = () => {
       <div className="absolute top-[60vh] right-1/4 translate-x-1/2 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none z-0" />
 
       <div className="z-40">
-        <Navbar />
+        {showStudentNavbar && <Navbar forceSubscriberView={user?.role === 'admin' && adminPreview} />}
 
 {user?.role === 'admin' && adminPreview && (
   <button

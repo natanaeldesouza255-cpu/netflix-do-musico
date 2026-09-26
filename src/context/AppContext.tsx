@@ -13,6 +13,7 @@ import {
 } from '../data/mockData';
 import { TEST_ACCOUNTS } from '../config/credentials';
 import { loadJSON, saveJSON, uid, nowLabel } from '../lib/storage';
+import { supabase } from '../lib/supabase';
 import {
   ActivityLog,
   ManagedUser,
@@ -259,16 +260,43 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { saveJSON('aiCalendar', aiCalendar); }, [aiCalendar]);
 
   useEffect(() => {
+    const client = supabase;
+    if (!client) return;
+    let cancelled = false;
+
+    const loadSettingsFromSupabase = async () => {
+      const { data, error } = await client
+        .from('platform_settings')
+        .select('*')
+        .eq('id', 'main')
+        .maybeSingle();
+
+      if (error || !data || cancelled) return;
+
+      setSettings((prev) => ({
+        ...prev,
+        platformName: data.platform_name,
+        tagline: data.tagline,
+        supportEmail: data.support_email,
+        planName: data.plan_name,
+        planPrice: Number(data.plan_price),
+        maintenanceMode: data.maintenance_mode,
+        allowRegistrations: data.allow_registrations,
+        adminMenu: Array.isArray(data.admin_menu) ? data.admin_menu : prev.adminMenu,
+      }));
+    };
+
+    void loadSettingsFromSupabase();
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
     if (!toast) return;
     const timer = window.setTimeout(() => setToast(null), 3200);
     return () => window.clearTimeout(timer);
   }, [toast]);
 
   useEffect(() => {
-    if (user?.role === 'admin' && !isAdminScreen(currentScreen)) {
-      setCurrentScreen('AdminDashboard');
-      setScreenParams(null);
-    }
     if (user?.role === 'student' && isAdminScreen(currentScreen)) {
       setCurrentScreen('MemberHome');
       setScreenParams(null);
@@ -282,12 +310,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const publishedLessons = useMemo(() => {
     const publishedIds = new Set(publishedCourses.map((c) => c.id));
+    const validModuleIds = new Set(modules.filter((m) => publishedIds.has(m.courseId)).map((m) => m.id));
     return catalogLessons.filter(
       (lesson) =>
         (lesson.status ?? 'published') === 'published' &&
-        (!lesson.courseId || publishedIds.has(lesson.courseId))
+        (!lesson.courseId || publishedIds.has(lesson.courseId)) &&
+        (!lesson.moduleId || validModuleIds.has(lesson.moduleId))
     );
-  }, [catalogLessons, publishedCourses]);
+  }, [catalogLessons, publishedCourses, modules]);
 
   const navigateTo = (screen: ScreenName, params: any = null) => {
     if (user?.role === 'student' && isAdminScreen(screen)) {
@@ -804,9 +834,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveSettings = (updated: Partial<PlatformSettings>) => {
-    setSettings((prev) => ({ ...prev, ...updated }));
-    showToast('success', 'ConfiguraÃ§Ãµes salvas.');
-    logActivity('ConfiguraÃ§Ãµes da plataforma foram atualizadas.');
+    const next = { ...settings, ...updated };
+    setSettings(next);
+
+    if (supabase) {
+      void supabase
+        .from('platform_settings')
+        .upsert({
+          id: 'main',
+          platform_name: next.platformName,
+          tagline: next.tagline,
+          support_email: next.supportEmail,
+          plan_name: next.planName,
+          plan_price: next.planPrice,
+          maintenance_mode: next.maintenanceMode,
+          allow_registrations: next.allowRegistrations,
+          admin_menu: next.adminMenu,
+          updated_at: new Date().toISOString(),
+        })
+        .then(({ error }) => {
+          if (error) {
+            showToast('error', 'Não foi possível salvar as configurações no Supabase.');
+            return;
+          }
+          showToast('success', 'Configurações salvas no Supabase.');
+        });
+    } else {
+      showToast('success', 'Configurações salvas localmente.');
+    }
+
+    logActivity('Configurações da plataforma foram atualizadas.');
   };
 
   return (
