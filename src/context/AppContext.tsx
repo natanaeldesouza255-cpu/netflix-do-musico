@@ -260,11 +260,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { saveJSON('aiCalendar', aiCalendar); }, [aiCalendar]);
 
   useEffect(() => {
-    if (!supabase) return;
+    const client = supabase;
+    if (!client) return;
     let cancelled = false;
 
     const loadSettingsFromSupabase = async () => {
-      const { data, error } = await supabase
+      const { data, error } = await client
         .from('platform_settings')
         .select('*')
         .eq('id', 'main')
