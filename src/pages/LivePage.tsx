@@ -41,6 +41,17 @@ export const LivePage: React.FC = () => {
   const scheduledLives = lives.filter(l => l.status === 'scheduled' || l.status === 'live');
   const replayLives = lives.filter(l => l.status === 'replay' || l.status === 'finished');
 
+  // Mantém o player sincronizado com alterações feitas pelo Admin.
+  useEffect(() => {
+    if (!activeLive) return;
+    const updatedLive = lives.find(l => l.id === activeLive.id);
+    if (!updatedLive || (updatedLive.status !== 'replay' && updatedLive.status !== 'finished')) {
+      setActiveLive(replayLives[0] || null);
+      return;
+    }
+    if (updatedLive !== activeLive) setActiveLive(updatedLive);
+  }, [lives, activeLive, replayLives]);
+
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // SIMULADOR DE CHAT DA LIVE EM TEMPO REAL (MOCK CHAT FEED)

@@ -56,7 +56,9 @@ export const StudentProfile: React.FC = () => {
   const visibleFavoriteCount = favLessonsObj.length + favEquipsObj.length;
 
   // 3. BUSCA POSTS DO ALUNO
-  const studentPosts = communityFeed.filter(post => post.authorName === user.name);
+  const studentPosts = communityFeed.filter(post =>
+    post.authorName === user.name && (post.moderationStatus || 'visible') === 'visible'
+  );
 
   // 4. DADOS DO GRÁFICO DE EVOLUÇÃO TÉCNICA (MOCK EM STATE)
   const skillsData = [

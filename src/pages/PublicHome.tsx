@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { lessonsData, Lesson } from '../data/mockData';
+import { Lesson } from '../data/mockData';
 import { VideoCard } from '../components/VideoCard';
 import { Sparkles, Music, Shield, Play, X, UserCheck, Flame } from 'lucide-react';
 
 export const PublicHome: React.FC = () => {
-  const { navigateTo } = useApp();
+  const { navigateTo, publishedLessons } = useApp();
   const [activePreview, setActivePreview] = useState<Lesson | null>(null);
 
-  const freeLessons = lessonsData.filter(lesson => lesson.isFree);
+  // A vitrine pública acompanha o conteúdo publicado pelo Admin.
+  const freeLessons = publishedLessons.filter(lesson => lesson.isFree);
 
   const handleWatchFree = (lesson: Lesson) => {
     setActivePreview(lesson);

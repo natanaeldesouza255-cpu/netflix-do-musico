@@ -36,7 +36,13 @@ export const EquipmentReviews: React.FC = () => {
   useEffect(() => {
     if (screenParams?.activeEqId) {
       const match = publishedEquipments.find(e => e.id === screenParams.activeEqId);
-      if (match) setSelectedEq(match);
+      setSelectedEq(match || null);
+      return;
+    }
+
+    if (selectedEq) {
+      const updated = publishedEquipments.find(e => e.id === selectedEq.id);
+      setSelectedEq(updated || null);
     }
   }, [screenParams, equipments]);
 

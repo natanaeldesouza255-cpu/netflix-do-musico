@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { marketplaceData, MarketplaceItem } from '../data/mockData';
+import { MarketplaceItem } from '../data/mockData';
 import { ShoppingBag, ArrowRight, X, ShieldCheck, Sparkles, CreditCard, CheckCircle, Tag } from 'lucide-react';
 
 export const MarketplacePage: React.FC = () => {
-  const { navigateTo, user } = useApp();
+  const { user, marketplaceItems } = useApp();
   
   const [activeFilter, setActiveFilter] = useState<string>('Tudo');
   const [selectedProduct, setSelectedProduct] = useState<MarketplaceItem | null>(null);
   const [checkoutComplete, setCheckoutComplete] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const filtersList = ['Tudo', 'VSTs', 'Presets', 'Sample Packs', 'Cursos'];
+  const activeItems = marketplaceItems.filter(item => item.status !== 'inactive');
+  const filtersList = ['Tudo', ...Array.from(new Set(activeItems.map(item => item.type)))];
 
   const filteredItems = activeFilter === 'Tudo'
-    ? marketplaceData
-    : marketplaceData.filter(item => item.type === activeFilter);
+    ? activeItems
+    : activeItems.filter(item => item.type === activeFilter);
 
   const handleOpenCheckout = (product: MarketplaceItem) => {
     setSelectedProduct(product);
@@ -76,6 +77,11 @@ export const MarketplacePage: React.FC = () => {
       </section>
 
       {/* GRADE DE PRODUTOS DIGITAIS */}
+      {filteredItems.length === 0 ? (
+        <section className="glass-panel rounded-2xl border border-zinc-800 p-10 text-center text-sm text-zinc-500">
+          Nenhum produto ativo nesta categoria no momento.
+        </section>
+      ) : (
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map(item => (
           <div 
@@ -132,6 +138,7 @@ export const MarketplacePage: React.FC = () => {
           </div>
         ))}
       </section>
+      )}
 
       {/* FUTURO AVISO / CHAMADO */}
       <section className="glass-panel rounded-2xl p-6 border border-zinc-800 bg-gradient-to-r from-zinc-950 to-purple-950/15 text-center flex flex-col items-center gap-3">
