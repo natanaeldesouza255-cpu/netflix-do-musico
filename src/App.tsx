@@ -25,11 +25,27 @@ import { AdminMarketplace } from './pages/admin/AdminMarketplace';
 import { AdminEquipment } from './pages/admin/AdminEquipment';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { ShieldCheck } from 'lucide-react';
+import { isSupabaseConfigured, supabase } from './lib/supabase';
 
 const MainLayout: React.FC = () => {
   const [adminPreview, setAdminPreview] = React.useState(false);
   const { currentScreen, isSubscriber, navigateTo, user } = useApp();
   const showStudentNavbar = isSubscriber || (user?.role === 'admin' && adminPreview);
+
+  useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      console.warn('[Supabase] Configuração local não encontrada.');
+      return;
+    }
+
+    supabase.auth.getSession().then(({ error }) => {
+      if (error) {
+        console.error('[Supabase] Falha no teste de conexão:', error.message);
+        return;
+      }
+      console.info('[Supabase] Conexão com a API confirmada.');
+    });
+  }, []);
 
   useEffect(() => {
     if (!isSubscriber) return;
