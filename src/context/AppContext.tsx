@@ -13,6 +13,7 @@ import {
 } from '../data/mockData';
 import { TEST_ACCOUNTS } from '../config/credentials';
 import { loadJSON, saveJSON, uid, nowLabel } from '../lib/storage';
+import { supabase } from '../lib/supabase';
 import {
   ActivityLog,
   ManagedUser,
@@ -257,6 +258,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => { saveJSON('settings', settings); }, [settings]);
   useEffect(() => { saveJSON('activities', activities); }, [activities]);
   useEffect(() => { saveJSON('aiCalendar', aiCalendar); }, [aiCalendar]);
+
+  useEffect(() => {
+    if (!supabase) return;
+    let cancelled = false;
+
+    const loadSettingsFromSupabase = async () => {
+      const { data, error } = await supabase
+        .from('platform_settings')
+        .select('*')
+        .eq('id', 'main')
+        .maybeSingle();
+
+      if (error || !data || cancelled) return;
+
+      setSettings((prev) => ({
+        ...prev,
+        platformName: data.platform_name,
+        tagline: data.tagline,
+        supportEmail: data.support_email,
+        planName: data.plan_name,
+        planPrice: Number(data.plan_price),
+        maintenanceMode: data.maintenance_mode,
+        allowRegistrations: data.allow_registrations,
+        adminMenu: Array.isArray(data.admin_menu) ? data.admin_menu : prev.adminMenu,
+      }));
+    };
+
+    void loadSettingsFromSupabase();
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     if (!toast) return;
@@ -802,9 +833,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const saveSettings = (updated: Partial<PlatformSettings>) => {
-    setSettings((prev) => ({ ...prev, ...updated }));
-    showToast('success', 'ConfiguraÃ§Ãµes salvas.');
-    logActivity('ConfiguraÃ§Ãµes da plataforma foram atualizadas.');
+    const next = { ...settings, ...updated };
+    setSettings(next);
+
+    if (supabase) {
+      void supabase
+        .from('platform_settings')
+        .upsert({
+          id: 'main',
+          platform_name: next.platformName,
+          tagline: next.tagline,
+          support_email: next.supportEmail,
+          plan_name: next.planName,
+          plan_price: next.planPrice,
+          maintenance_mode: next.maintenanceMode,
+          allow_registrations: next.allowRegistrations,
+          admin_menu: next.adminMenu,
+          updated_at: new Date().toISOString(),
+        })
+        .then(({ error }) => {
+          if (error) {
+            showToast('error', 'Não foi possível salvar as configurações no Supabase.');
+            return;
+          }
+          showToast('success', 'Configurações salvas no Supabase.');
+        });
+    } else {
+      showToast('success', 'Configurações salvas localmente.');
+    }
+
+    logActivity('Configurações da plataforma foram atualizadas.');
   };
 
   return (
