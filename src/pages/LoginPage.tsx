@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { TEST_ACCOUNTS } from '../config/credentials';
 import { Mail, Lock, ShieldAlert, Sparkles, UserPlus, LogIn, Shield } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 export const LoginPage: React.FC = () => {
   const { loginUser, settings } = useApp();
@@ -12,13 +13,34 @@ export const LoginPage: React.FC = () => {
   const [name, setName] = useState('');
   const [instrument, setInstrument] = useState('Violão');
   const [error, setError] = useState<string | null>(null);
+  const [isRecovery, setIsRecovery] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [recoveryDone, setRecoveryDone] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    if (hash.get('type') === 'recovery' || hash.has('access_token')) setIsRecovery(true);
+  }, []);
+
+  const handleRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!supabase) return setError('Supabase não está configurado.');
+    if (newPassword.length < 6) return setError('A nova senha deve ter no mínimo 6 caracteres.');
+    if (newPassword !== confirmPassword) return setError('As senhas não são iguais.');
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) return setError('O link expirou ou não foi possível alterar a senha. Solicite um novo link.');
+    setRecoveryDone(true);
+    window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
     if (isLoginTab) {
-      const success = loginUser(email, password);
+      const success = await loginUser(email, password);
       if (!success) {
         setError('Credenciais inválidas. Use as contas de teste ou uma senha com pelo menos 6 caracteres.');
       }
@@ -27,10 +49,34 @@ export const LoginPage: React.FC = () => {
         setError('Preencha todos os campos obrigatórios. A senha deve ter no mínimo 6 caracteres.');
         return;
       }
-      const success = loginUser(email, password);
+      const success = await loginUser(email, password);
       if (!success) setError('Não foi possível criar a conta neste momento.');
     }
   };
+
+  if (isRecovery) {
+    return (
+      <div className="mx-auto max-w-md px-4 py-16 sm:py-24">
+        <div className="glass-panel border rounded-2xl p-6 sm:p-8 border-zinc-800 shadow-2xl">
+          <h2 className="font-heading text-xl font-black text-white uppercase text-center">Criar nova senha</h2>
+          <p className="text-xs text-zinc-400 mt-2 mb-6 text-center">Defina uma nova senha para sua conta.</p>
+          {error && <div className="bg-red-950/30 border border-red-500/20 text-red-400 p-3 rounded-lg text-xs mb-4">{error}</div>}
+          {recoveryDone ? (
+            <div className="text-center">
+              <p className="text-emerald-400 text-sm mb-4">Senha alterada com sucesso.</p>
+              <button onClick={() => { setIsRecovery(false); setPassword(''); }} className="w-full bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs py-3 rounded-lg">Ir para o login</button>
+            </div>
+          ) : (
+            <form onSubmit={handleRecovery} className="flex flex-col gap-4">
+              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="Nova senha" className="rounded-lg bg-zinc-950 border border-zinc-800 text-xs px-3.5 py-3 text-zinc-200" required />
+              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirmar nova senha" className="rounded-lg bg-zinc-950 border border-zinc-800 text-xs px-3.5 py-3 text-zinc-200" required />
+              <button type="submit" className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white font-bold text-xs py-3 rounded-lg">Salvar nova senha</button>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-md px-4 py-16 sm:py-24" id="login-page-root">

@@ -117,19 +117,14 @@ const MainLayout: React.FC = () => {
   if (user?.role === 'admin' && isAdminScreen(currentScreen) && !adminPreview) {
     return (
       <>
-        <>
-  <AdminLayout>{renderAdminScreen()}</AdminLayout>
-
-  <button
-    onClick={() => {
-      setAdminPreview(true);
-      navigateTo('MemberHome');
-    }}
-    className="fixed bottom-6 right-6 z-[9999] rounded-xl bg-gradient-to-r from-purple-600 to-cyan-500 px-5 py-3 text-sm font-bold text-white shadow-2xl hover:scale-105 transition"
-  >
-    👁 Visualizar como aluno
-  </button>
-</>
+        <AdminLayout
+          onPreviewStudent={() => {
+            setAdminPreview(true);
+            navigateTo('MemberHome');
+          }}
+        >
+          {renderAdminScreen()}
+        </AdminLayout>
         <ToastHost />
       </>
     );

@@ -128,7 +128,7 @@ interface AppContextType {
   setSearchQuery: (query: string) => void;
   navigateTo: (screen: ScreenName, params?: any) => void;
   goBack: () => void;
-  loginUser: (email: string, password: string) => boolean;
+  loginUser: (email: string, password: string) => Promise<boolean>;
   logoutUser: () => void;
   updateProfile: (updated: Partial<StudentProfile>) => void;
   toggleLessonComplete: (lessonId: string) => void;
@@ -345,9 +345,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  // Futuro: autenticar via Supabase Auth (signInWithPassword) e carregar role da tabela profiles.
-  const loginUser = (email: string, password: string): boolean => {
+  const loginUser = async (email: string, password: string): Promise<boolean> => {
     const normalized = email.trim().toLowerCase();
+
+    if (supabase) {
+      const { error } = await supabase.auth.signInWithPassword({ email: normalized, password });
+      if (!error) {
+        const stored = students.find((s) => s.email.toLowerCase() === normalized);
+        const isAdmin = normalized === TEST_ACCOUNTS.admin.email || stored?.role === 'admin';
+        const profile: StudentProfile = isAdmin
+          ? { ...defaultAdminProfile, email: normalized }
+          : stored
+            ? {
+                id: stored.id, name: stored.name, email: stored.email, avatar: stored.avatar,
+                instrument: stored.instrument, level: stored.level, bio: stored.bio, xp: stored.xp,
+                role: 'student', status: stored.status, subscriptionStatus: stored.subscriptionStatus,
+              }
+            : { ...defaultStudentProfile, email: normalized };
+        if (profile.status === 'inactive') {
+          await supabase.auth.signOut();
+          showToast('error', 'Esta conta de aluno está desativada.');
+          return false;
+        }
+        setUser(profile);
+        setIsSubscriber(!isAdmin);
+        setCurrentScreen(isAdmin ? 'AdminDashboard' : 'MemberHome');
+        setHistoryStack([]);
+        showToast('success', isAdmin ? 'Bem-vindo ao painel administrativo.' : 'Login de aluno realizado.');
+        return true;
+      }
+    }
 
     if (normalized === TEST_ACCOUNTS.admin.email && password === TEST_ACCOUNTS.admin.password) {
       setUser({ ...defaultAdminProfile });
@@ -391,6 +418,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const logoutUser = () => {
+    if (supabase) void supabase.auth.signOut();
     setUser(null);
     setIsSubscriber(false);
     setCurrentScreen('Login');

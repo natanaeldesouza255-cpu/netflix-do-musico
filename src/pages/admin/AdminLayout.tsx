@@ -14,6 +14,8 @@ import {
   LogOut,
   Menu,
   X,
+  Eye,
+  Pencil,
 } from 'lucide-react';
 
 const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -29,7 +31,7 @@ const ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   settings: Settings,
 };
 
-export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AdminLayout: React.FC<{ children: React.ReactNode; onPreviewStudent?: () => void }> = ({ children, onPreviewStudent }) => {
   const { user, currentScreen, navigateTo, logoutUser, settings } = useApp();
   const [open, setOpen] = useState(false);
 
@@ -68,6 +70,22 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
               </button>
             );
           })}
+          <div className="mt-3 pt-3 border-t border-zinc-800 flex flex-col gap-1">
+            <button
+              onClick={() => { navigateTo('AdminSettings'); setOpen(false); }}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-left text-zinc-400 hover:bg-zinc-900 hover:text-white border border-transparent"
+            >
+              <Pencil className="h-4 w-4" />
+              Editar menu
+            </button>
+            <button
+              onClick={() => { onPreviewStudent?.(); setOpen(false); }}
+              className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-left text-cyan-300 hover:bg-cyan-950/30 border border-transparent"
+            >
+              <Eye className="h-4 w-4" />
+              Visualizar como aluno
+            </button>
+          </div>
         </nav>
         <div className="absolute bottom-0 inset-x-0 p-4 border-t border-zinc-800">
           <div className="flex items-center gap-2 mb-3">
@@ -93,7 +111,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode }> = ({ children 
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="text-xs text-zinc-500 hidden sm:block">
-            Protótipo administrativo — autenticação mock, não usar em produção.
+            Painel administrativo — Supabase Auth conectado.
           </div>
           <div className="text-[10px] font-mono text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-full">
             {user?.role?.toUpperCase()}
