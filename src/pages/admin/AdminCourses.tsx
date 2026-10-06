@@ -33,10 +33,9 @@ export const AdminCourses: React.FC = () => {
     setOpen(true);
   };
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    saveCourse(form);
-    setOpen(false);
+    if (await saveCourse(form)) setOpen(false);
   };
 
   return (

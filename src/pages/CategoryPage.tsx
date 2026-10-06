@@ -32,67 +32,19 @@ export const CategoryPage: React.FC = () => {
   } = useApp();
 
   const activeCategory: MusicCategory = screenParams?.category || 'Violão';
-
-  // 1. FILTRAGEM DE AULAS DA CATEGORIA
-  const categoryLessons = publishedLessons.filter(l => l.category === activeCategory);
-
-  // 2. CONTROLE DE NÍVEL (TEMPORADA) ATIVO
+  const categoryLessons = publishedLessons.filter(l => screenParams?.courseId ? l.courseId === screenParams.courseId : l.category === activeCategory);
   const levelsOrder: MusicLevel[] = ['Nível Zero', 'Aprendiz', 'Mediano', 'Profissional', 'Avançado'];
-  
-  // Decide qual nível selecionar por padrão: se houver aula ativa no params, pega o dela. Senão o primeiro nível disponível com aulas.
-  const [activeLevel, setActiveLevel] = useState<MusicLevel>(() => {
-    if (screenParams?.activeLessonId) {
-      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
-      if (match) return match.level;
-    }
-    // Procura primeiro nível que tem aula
-    for (const lvl of levelsOrder) {
-      if (categoryLessons.some(l => l.level === lvl)) return lvl;
-    }
-    return 'Nível Zero';
-  });
-
-  // Aulas do nível/temporada ativa
+  const [chosenLevel, setChosenLevel] = useState<MusicLevel | null>(null);
+  const [chosenLessonId, setChosenLessonId] = useState<string | null>(null);
+  useEffect(() => {setChosenLessonId(null);setChosenLevel(null);}, [screenParams]);
+  const requested = categoryLessons.find(l => l.id === (chosenLessonId || screenParams?.activeLessonId));
+  const activeLevel = chosenLevel && categoryLessons.some(l => l.level === chosenLevel) ? chosenLevel : requested?.level || categoryLessons[0]?.level || 'Nível Zero';
   const levelLessons = categoryLessons.filter(l => l.level === activeLevel);
-
-  // 3. CONTROLE DE AULA ATIVA (EPISÓDIO ATIVO)
-  const [activeLesson, setActiveLesson] = useState<Lesson>(() => {
-    if (screenParams?.activeLessonId) {
-      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
-      if (match) return match;
-    }
-    return levelLessons[0] || categoryLessons[0];
-  });
-
-  // Atualiza a aula ativa se os parâmetros mudarem (ex: busca rápida clicada)
-  useEffect(() => {
-    if (screenParams?.activeLessonId) {
-      const match = publishedLessons.find(l => l.id === screenParams.activeLessonId);
-      if (match) {
-        setActiveLesson(match);
-        setActiveLevel(match.level);
-      }
-    }
-  }, [screenParams]);
-
-  // Grava no histórico de "Continuar Assistindo" quando a aula é iniciada
-  useEffect(() => {
-    if (activeLesson) {
-      addToWatchedHistory(activeLesson.id);
-    }
-  }, [activeLesson]);
-
-  const handleLessonSelect = (lesson: Lesson) => {
-    setActiveLesson(lesson);
-  };
-
-  const handleLevelChange = (level: MusicLevel) => {
-    setActiveLevel(level);
-    const firstLessonInLevel = categoryLessons.find(l => l.level === level);
-    if (firstLessonInLevel) {
-      setActiveLesson(firstLessonInLevel);
-    }
-  };
+  const activeLesson = levelLessons.find(l => l.id === requested?.id) || levelLessons[0];
+  useEffect(() => {if(activeLesson) addToWatchedHistory(activeLesson.id);}, [activeLesson?.id]);
+  const handleLessonSelect = (lesson: Lesson) => {setChosenLessonId(lesson.id);setChosenLevel(lesson.level);};
+  const handleLevelChange = (level: MusicLevel) => {setChosenLevel(level);setChosenLessonId(null);};
+  if (!activeLesson) return <div className="p-8 text-center"><p>Nenhuma aula publicada neste curso.</p><button onClick={goBack} className="mt-4 text-purple-400">Voltar</button></div>;
 
   const isFavorited = favoriteLessons.includes(activeLesson.id);
   const isCompleted = completedLessons.includes(activeLesson.id);
@@ -161,7 +113,7 @@ export const CategoryPage: React.FC = () => {
             {/* Alerta de Link Protegido */}
             <div className="absolute top-3 left-3 bg-black/70 border border-red-500/20 text-red-400 text-[8px] sm:text-[9px] font-mono px-2 py-0.5 rounded flex items-center gap-1 pointer-events-none">
               <Lock className="h-3 w-3" />
-              URL PROTEGIDA POR DRM E IP
+              ÁREA DO ALUNO
             </div>
           </div>
 
@@ -217,22 +169,7 @@ export const CategoryPage: React.FC = () => {
               {activeLesson.description}
             </p>
 
-            {/* EXPLICAÇÃO TÉCNICA DA ARQUITETURA DRM (SEGURANÇA MVP) */}
-            <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-4 mt-1 flex flex-col gap-2">
-              <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-                <ShieldAlert className="h-4 w-4 text-cyan-400" />
-                Arquitetura de Segurança de Vídeo & DRM
-              </div>
-              <p className="text-[11px] text-zinc-450 leading-relaxed">
-                Este MVP simula proteções de segurança completas para impedir clonagem e roubo de arquivos digitais:
-              </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-zinc-550 list-disc list-inside">
-                <li><strong className="text-zinc-400">Marca D'água Dinâmica:</strong> Renderiza dados do usuário em posições randômicas reativas.</li>
-                <li><strong className="text-zinc-400">Proteção de Download:</strong> Links ocultados na DOM; bloqueio de clique direito e F12.</li>
-                <li><strong className="text-zinc-400">DRM Baseado em Chaves:</strong> Preparado para descriptografia Widevine e FairPlay em produção.</li>
-                <li><strong className="text-zinc-400">URLs Temporárias:</strong> Abstracionismo de endpoints de streaming assinados via tokens HMAC.</li>
-              </ul>
-            </div>
+
           </div>
 
         </div>

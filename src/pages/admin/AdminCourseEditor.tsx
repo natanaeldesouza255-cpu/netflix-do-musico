@@ -133,10 +133,9 @@ export const AdminCourseEditor: React.FC = () => {
         {moduleForm && (
           <form
             className="flex flex-col gap-3"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              saveModule(moduleForm);
-              setModuleForm(null);
+              if (await saveModule(moduleForm)) setModuleForm(null);
             }}
           >
             <Field label="Nome"><input className={inputClass} value={moduleForm.name} onChange={(e) => setModuleForm({ ...moduleForm, name: e.target.value })} required /></Field>
@@ -150,10 +149,9 @@ export const AdminCourseEditor: React.FC = () => {
         {lessonForm && (
           <form
             className="flex flex-col gap-3"
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
-              saveLesson(lessonForm);
-              setLessonForm(null);
+              if (await saveLesson(lessonForm)) setLessonForm(null);
             }}
           >
             <Field label="Título"><input className={inputClass} value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} required /></Field>

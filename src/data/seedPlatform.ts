@@ -16,6 +16,7 @@ import {
 } from './mockData';
 
 export interface ManagedUser {
+  _revision?: number;
   id: string;
   name: string;
   email: string;
@@ -53,6 +54,7 @@ export interface AdminMenuItem {
 }
 
 export interface PlatformSettings {
+  _revision?: number;
   platformName: string;
   tagline: string;
   supportEmail: string;

@@ -57,7 +57,7 @@ export const StudentProfile: React.FC = () => {
 
   // 3. BUSCA POSTS DO ALUNO
   const studentPosts = communityFeed.filter(post =>
-    post.authorName === user.name && (post.moderationStatus || 'visible') === 'visible'
+    post.authorId === user.id && post.moderationStatus !== 'hidden'
   );
 
   // 4. DADOS DO GRÁFICO DE EVOLUÇÃO TÉCNICA (MOCK EM STATE)
@@ -70,14 +70,14 @@ export const StudentProfile: React.FC = () => {
     { name: 'Repertório Prático', score: 75, color: 'from-indigo-500 to-violet-500' }
   ];
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    updateProfile({
+    const saved = await updateProfile({
       name: editName,
       bio: editBio,
       instrument: editInstrument
     });
-    setIsEditing(false);
+    if (saved) setIsEditing(false);
   };
 
   return (

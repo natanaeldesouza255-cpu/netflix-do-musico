@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { useApp, ScreenName } from '../context/AppContext';
-import { 
-  Search, 
-  Menu, 
-  X, 
-  LogOut, 
-  User as UserIcon, 
-  Compass, 
-  BookOpen, 
-  Users, 
-  Radio, 
-  ShoppingBag, 
-  TrendingUp, 
+import {
+  Search,
+  Menu,
+  X,
+  LogOut,
+  User as UserIcon,
+  Compass,
+  BookOpen,
+  Users,
+  Radio,
+  ShoppingBag,
+  TrendingUp,
   Award,
   Zap
 } from 'lucide-react';
@@ -19,11 +19,11 @@ import {
 interface NavbarProps { forceSubscriberView?: boolean; }
 
 export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) => {
-  const { 
-    user, 
-    isSubscriber, 
-    currentScreen, 
-    navigateTo, 
+  const {
+    user,
+    isSubscriber,
+    currentScreen,
+    navigateTo,
     logoutUser,
     searchQuery,
     setSearchQuery,
@@ -40,17 +40,17 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
   // LOGICA DE BUSCA
   const getSearchResults = () => {
     if (searchQuery.trim() === '') return [];
-    
+
     const query = searchQuery.toLowerCase();
-    
-    const filteredLessons = publishedLessons.filter(l => 
-      l.title.toLowerCase().includes(query) || 
+
+    const filteredLessons = publishedLessons.filter(l =>
+      l.title.toLowerCase().includes(query) ||
       l.description.toLowerCase().includes(query) ||
       l.category.toLowerCase().includes(query)
     ).map(l => ({ ...l, type: 'Aulas' as const }));
 
-    const filteredEquips = equipments.filter(e => e.published !== false).filter(e => 
-      e.name.toLowerCase().includes(query) || 
+    const filteredEquips = (isEnabled('equipment') ? equipments : []).filter(e => e.published !== false).filter(e =>
+      e.name.toLowerCase().includes(query) ||
       e.description.toLowerCase().includes(query) ||
       e.type.toLowerCase().includes(query)
     ).map(e => ({ ...e, type: 'Equipamentos' as const }));
@@ -58,14 +58,14 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
     return [...filteredLessons, ...filteredEquips].slice(0, 6);
   };
 
-  const results = getSearchResults();
+
 
   const handleResultClick = (item: any) => {
     setSearchQuery('');
     setShowSearchResults(false);
-    
+
     if (item.type === 'Aulas') {
-      navigateTo('CategoryPage', { category: item.category, activeLessonId: item.id });
+      navigateTo('CategoryPage', { category: item.category, courseId: item.courseId, activeLessonId: item.id });
     } else {
       navigateTo('EquipmentReviews', { activeEqId: item.id });
     }
@@ -73,6 +73,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
 
   const adminVisibility = new Map((settings.adminMenu || []).map((item) => [item.id, item.visible]));
   const isEnabled = (id: string) => adminVisibility.get(id) !== false;
+  const results = getSearchResults();
 
   const navItems = [
     { label: 'Início', screen: 'MemberHome' as const, icon: Compass },
@@ -87,9 +88,9 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
   return (
     <nav className="sticky top-0 z-50 w-full glass-panel border-b border-zinc-800/80 px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        
+
         {/* LOGO */}
-        <button 
+        <button
           onClick={() => navigateTo(showSubscriberUi ? 'MemberHome' : 'PublicHome')}
           className="flex items-center gap-2 font-heading text-lg sm:text-2xl font-extrabold tracking-tight text-white focus:outline-none"
         >
@@ -160,8 +161,8 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                     key={item.label}
                     onClick={() => navigateTo(item.screen, item.params)}
                     className={`flex items-center gap-1.5 text-sm font-medium transition focus:outline-none ${
-                      isActive 
-                        ? 'text-cyan-400 font-semibold' 
+                      isActive
+                        ? 'text-cyan-400 font-semibold'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
@@ -192,7 +193,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                     </div>
                   </div>
                 </button>
-                <button 
+                <button
                   onClick={logoutUser}
                   className="text-zinc-500 hover:text-red-400 transition p-1.5 rounded-full hover:bg-zinc-900 focus:outline-none"
                   title="Sair da conta"
@@ -203,13 +204,13 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
             </>
           ) : (
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => navigateTo('PublicHome')}
                 className={`text-sm font-medium transition ${currentScreen === 'PublicHome' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
               >
                 Início Público
               </button>
-              <button 
+              <button
                 onClick={() => navigateTo('Login')}
                 className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-bold text-white rounded-full group bg-gradient-to-br from-purple-600 to-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
@@ -242,7 +243,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
       {/* MENU MOBILE EXPANDIDO */}
       {mobileMenuOpen && (
         <div className="lg:hidden w-full glass-panel mt-4 rounded-xl border border-zinc-800/80 p-4 shadow-2xl flex flex-col gap-4 animate-fade-in">
-          
+
           {/* BUSCA MOBILE */}
           {showSubscriberUi && (
             <div className="relative w-full">
@@ -297,8 +298,8 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                       setMobileMenuOpen(false);
                     }}
                     className={`flex items-center gap-3 p-2.5 rounded-lg text-left text-sm font-medium transition ${
-                      isActive 
-                        ? 'bg-cyan-950/40 border border-cyan-500/20 text-cyan-400' 
+                      isActive
+                        ? 'bg-cyan-950/40 border border-cyan-500/20 text-cyan-400'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
                     }`}
                   >
@@ -326,7 +327,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                     <div className="text-xs text-purple-400 font-mono">{user?.email}</div>
                   </div>
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     logoutUser();
                     setMobileMenuOpen(false);
@@ -340,7 +341,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => {
                   navigateTo('PublicHome');
                   setMobileMenuOpen(false);
@@ -349,7 +350,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
               >
                 Início Público
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigateTo('Login');
                   setMobileMenuOpen(false);

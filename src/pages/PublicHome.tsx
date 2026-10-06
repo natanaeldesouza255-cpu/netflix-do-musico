@@ -6,10 +6,11 @@ import { Sparkles, Music, Shield, Play, X, UserCheck, Flame } from 'lucide-react
 
 export const PublicHome: React.FC = () => {
   const { navigateTo, publishedLessons } = useApp();
-  const [activePreview, setActivePreview] = useState<Lesson | null>(null);
+  const [selectedPreview, setActivePreview] = useState<Lesson | null>(null);
 
   // A vitrine pública acompanha o conteúdo publicado pelo Admin.
   const freeLessons = publishedLessons.filter(lesson => lesson.isFree);
+  const activePreview = freeLessons.find(lesson => lesson.id === selectedPreview?.id) || null;
 
   const handleWatchFree = (lesson: Lesson) => {
     setActivePreview(lesson);

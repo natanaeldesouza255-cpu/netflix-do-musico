@@ -1,3 +1,4 @@
+import { safeEmbedUrl } from '../lib/video';
 import React, { useState } from 'react';
 import { CommunityPost as PostType } from '../data/mockData';
 import { useApp } from '../context/AppContext';
@@ -16,24 +17,23 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
     likePost(post.id);
   };
 
-  const handleCommentSubmit = (e: React.FormEvent) => {
+  const handleCommentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (commentText.trim() === '') return;
-    addCommentToPost(post.id, commentText.trim());
-    setCommentText('');
+    if (await addCommentToPost(post.id, commentText.trim())) setCommentText('');
   };
 
   return (
-    <div 
+    <div
       className="glass-panel rounded-xl p-4 sm:p-5 border border-zinc-800 hover:border-purple-500/20 transition-all duration-300 shadow-lg"
       id={`community-post-${post.id}`}
     >
       {/* Cabeçalho do Autor */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3">
-          <img 
-            src={post.authorAvatar} 
-            alt={post.authorName} 
+          <img
+            src={post.authorAvatar}
+            alt={post.authorName}
             className="h-10 w-10 sm:h-11 sm:w-11 rounded-full object-cover border border-purple-500/35"
           />
           <div>
@@ -60,10 +60,12 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
       </div>
 
       {/* Evolution Video (se houver) */}
-      {post.videoUrl && (
+      {safeEmbedUrl(post.videoUrl) && (
         <div className="mt-4 rounded-lg overflow-hidden border border-zinc-800 bg-black aspect-video relative max-w-lg">
-          <iframe 
-            src={post.videoUrl} 
+          <iframe
+            src={safeEmbedUrl(post.videoUrl)!}
+            sandbox="allow-scripts allow-same-origin allow-presentation"
+            referrerPolicy="strict-origin-when-cross-origin"
             title="Vídeo de evolução"
             className="w-full h-full"
             allowFullScreen
@@ -77,7 +79,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
 
       {/* Ações Rápidas (Curtir & Comentar) */}
       <div className="mt-5 pt-3 border-t border-zinc-900/60 flex items-center gap-6 text-zinc-400">
-        <button 
+        <button
           onClick={handleLike}
           className="flex items-center gap-1.5 text-xs hover:text-cyan-400 transition focus:outline-none"
           id={`btn-like-post-${post.id}`}
@@ -86,7 +88,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
           <span>{post.likes} {post.likes === 1 ? 'Curtida' : 'Curtidas'}</span>
         </button>
 
-        <button 
+        <button
           onClick={() => setShowComments(!showComments)}
           className="flex items-center gap-1.5 text-xs hover:text-purple-400 transition focus:outline-none"
           id={`btn-toggle-comments-${post.id}`}
@@ -99,7 +101,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
       {/* Seção de Comentários */}
       {showComments && (
         <div className="mt-4 pt-4 border-t border-zinc-900/60 flex flex-col gap-4">
-          
+
           {/* Lista de Comentários */}
           {post.comments.length > 0 ? (
             <div className="flex flex-col gap-3">
@@ -129,7 +131,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
           {/* Adicionar Comentário */}
           {user && (
             <form onSubmit={handleCommentSubmit} className="flex gap-2 items-center mt-1">
-              <input 
+              <input
                 type="text"
                 value={commentText}
                 onChange={(e) => setCommentText(e.target.value)}
@@ -137,7 +139,7 @@ export const CommunityPost: React.FC<CommunityPostProps> = ({ post }) => {
                 className="flex-grow rounded-lg bg-zinc-950 border border-zinc-800 text-xs px-3.5 py-2 text-zinc-200 placeholder-zinc-500 focus:border-purple-400 focus:outline-none transition"
                 id={`input-comment-${post.id}`}
               />
-              <button 
+              <button
                 type="submit"
                 className="flex-none p-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg focus:outline-none transition"
                 id={`btn-send-comment-${post.id}`}

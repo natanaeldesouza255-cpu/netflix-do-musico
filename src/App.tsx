@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { AppProvider, useApp, isAdminScreen } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { ToastHost } from './components/ToastHost';
@@ -25,63 +25,13 @@ import { AdminMarketplace } from './pages/admin/AdminMarketplace';
 import { AdminEquipment } from './pages/admin/AdminEquipment';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { ShieldCheck } from 'lucide-react';
-import { isSupabaseConfigured, supabase } from './lib/supabase';
+import { isFeatureEnabled } from './lib/platform';
 
 const MainLayout: React.FC = () => {
-  const [adminPreview, setAdminPreview] = React.useState(false);
-  const { currentScreen, isSubscriber, navigateTo, user } = useApp();
+  const { currentScreen, isSubscriber, navigateTo, user, authLoading, dataError, dataWarning, refreshData, isSaving, isRecovery, settings, logoutUser } = useApp();
+  const adminPreview = user?.role === 'admin' && !isAdminScreen(currentScreen);
+  const syncWarning = dataWarning && <div role="alert" className="p-3 border border-amber-500 text-amber-300"><p>{dataWarning}</p><button onClick={() => void refreshData()} className="underline">Atualizar dados</button></div>;
   const showStudentNavbar = isSubscriber || (user?.role === 'admin' && adminPreview);
-
-  useEffect(() => {
-    if (!isSupabaseConfigured || !supabase) {
-      console.warn('[Supabase] Configuração local não encontrada.');
-      return;
-    }
-
-    supabase.auth.getSession().then(({ error }) => {
-      if (error) {
-        console.error('[Supabase] Falha no teste de conexão:', error.message);
-        return;
-      }
-      console.info('[Supabase] Conexão com a API confirmada.');
-    });
-  }, []);
-
-  useEffect(() => {
-    if (!isSubscriber) return;
-
-    const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-      alert('ðŸ›¡ï¸ Netflix do MÃºsico: Por motivos de seguranÃ§a e proteÃ§Ã£o de direitos autorais de nossos instrutores, o clique direito estÃ¡ desabilitado na Ã¡rea premium.');
-    };
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'F12') {
-        e.preventDefault();
-        alert('ðŸ›¡ï¸ Acesso de desenvolvedor bloqueado na Ã¡rea de assinantes.');
-      }
-      if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i' || e.key === 'J' || e.key === 'j' || e.key === 'C' || e.key === 'c')) {
-        e.preventDefault();
-        alert('ðŸ›¡ï¸ Ferramentas de inspeÃ§Ã£o bloqueadas para seguranÃ§a do streaming protegido.');
-      }
-      if (e.ctrlKey && (e.key === 'U' || e.key === 'u')) {
-        e.preventDefault();
-        alert('ðŸ›¡ï¸ Criptografia de cÃ³digo fonte ativa.');
-      }
-      if (e.ctrlKey && (e.key === 'S' || e.key === 's')) {
-        e.preventDefault();
-        alert('ðŸ›¡ï¸ Download offline bloqueado para seguranÃ§a DRM.');
-      }
-    };
-
-    window.addEventListener('contextmenu', handleContextMenu);
-    window.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      window.removeEventListener('contextmenu', handleContextMenu);
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isSubscriber]);
 
   const renderAdminScreen = () => {
     switch (currentScreen) {
@@ -114,16 +64,21 @@ const MainLayout: React.FC = () => {
     }
   };
 
+  if (authLoading) return <div role="status" className="p-8 text-center">Carregando sua sessão…</div>;
+  if (isRecovery) return <><LoginPage /><ToastHost /></>;
+  if (dataError) return <div role="alert" className="p-8 text-center space-y-4"><p>Não foi possível carregar a plataforma.</p><p>{dataError}</p><button onClick={() => void refreshData()}>Tentar novamente</button><ToastHost /></div>;
+
   if (user?.role === 'admin' && isAdminScreen(currentScreen) && !adminPreview) {
     return (
       <>
         <AdminLayout
           onPreviewStudent={() => {
-            setAdminPreview(true);
             navigateTo('MemberHome');
           }}
         >
-          {renderAdminScreen()}
+          {syncWarning}
+          <fieldset disabled={isSaving} className="min-w-0">{renderAdminScreen()}</fieldset>
+          {isSaving && <p role="status">Salvando alterações…</p>}
         </AdminLayout>
         <ToastHost />
       </>
@@ -137,6 +92,12 @@ const MainLayout: React.FC = () => {
     if (user?.role === 'student' && isAdminScreen(currentScreen)) {
       return <MemberHome />;
     }
+
+    if (user && user.role !== 'admin' && !isSubscriber && currentScreen !== 'Login' && currentScreen !== 'PublicHome') {
+      return <div className="p-8 text-center space-y-4"><h1>Acesso às aulas indisponível</h1><p>{settings.maintenanceMode ? 'Estamos em manutenção. Tente novamente mais tarde.' : 'Sua conta precisa estar ativa e com a assinatura liberada pelo administrador.'}</p><button onClick={logoutUser}>Sair da conta</button></div>;
+    }
+    const feature = ({CommunityPage:'community', LivePage:'lives', MarketplacePage:'marketplace', EquipmentReviews:'equipment'} as Record<string,string>)[currentScreen];
+    if (feature && !isFeatureEnabled(settings, feature)) return <MemberHome />;
 
     switch (currentScreen) {
       case 'PublicHome':
@@ -168,15 +129,14 @@ const MainLayout: React.FC = () => {
       <div className="absolute top-[60vh] right-1/4 translate-x-1/2 w-[400px] h-[400px] bg-cyan-500/5 rounded-full blur-3xl pointer-events-none z-0" />
 
       <div className="z-40">
-        {showStudentNavbar && <Navbar forceSubscriberView={user?.role === 'admin' && adminPreview} />}
+        <Navbar forceSubscriberView={!!adminPreview} />
 
 {user?.role === 'admin' && adminPreview && (
   <button
     onClick={() => {
-      setAdminPreview(false);
       navigateTo('AdminDashboard');
     }}
-    className="fixed top-5 right-5 z-[9999] rounded-xl bg-purple-600 px-5 py-3 text-sm font-bold text-white shadow-2xl hover:bg-purple-500 transition"
+    className="relative m-3 z-40 rounded-xl bg-purple-600 px-5 py-3 text-sm font-bold text-white shadow-2xl hover:bg-purple-500 transition"
   >
     ← Voltar ao Admin
   </button>
@@ -184,6 +144,7 @@ const MainLayout: React.FC = () => {
       </div>
 
       <main className="flex-grow z-10 w-full relative">
+        {syncWarning}
         {renderScreen()}
       </main>
 
@@ -211,7 +172,7 @@ const MainLayout: React.FC = () => {
           <div className="flex flex-col items-center md:items-end gap-1.5 text-zinc-650 text-[10px] text-center md:text-right font-medium">
             <div className="flex items-center gap-1 text-cyan-400/80 font-bold uppercase tracking-wider font-mono">
               <ShieldCheck className="h-4 w-4 text-cyan-400" />
-              ConexÃ£o Segura Ativa (DRM & Watermark)
+              Área de ensino musical
             </div>
             <span>Â© {new Date().getFullYear()} Netflix do MÃºsico S.A. Todos os direitos reservados.</span>
           </div>

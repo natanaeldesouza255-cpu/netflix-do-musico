@@ -52,18 +52,11 @@ export const EquipmentReviews: React.FC = () => {
     setCommentText('');
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEq || commentText.trim() === '') return;
 
-    addCommentToEquipment(selectedEq.id, rating, commentText.trim());
-    
-    // Atualiza o modal reativo localmente com o novo comentário
-    const updated = equipments.find(e => e.id === selectedEq.id);
-    if (updated) {
-      setSelectedEq(updated);
-    }
-    
+    if (!await addCommentToEquipment(selectedEq.id, rating, commentText.trim())) return;
     setCommentText('');
   };
 

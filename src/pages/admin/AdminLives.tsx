@@ -57,7 +57,7 @@ export const AdminLives: React.FC = () => {
 
       <AdminModal open={!!form} title={form?.id ? 'Editar live' : 'Nova live'} onClose={() => setForm(null)}>
         {form && (
-          <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); saveLive(form); setForm(null); }}>
+          <form className="flex flex-col gap-3" onSubmit={async (e) => { e.preventDefault(); if (await saveLive(form)) setForm(null); }}>
             <Field label="Título"><input className={inputClass} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required /></Field>
             <Field label="Descrição"><textarea className={inputClass} rows={3} value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
             <Field label="Professor"><input className={inputClass} value={form.presenter || ''} onChange={(e) => setForm({ ...form, presenter: e.target.value })} /></Field>

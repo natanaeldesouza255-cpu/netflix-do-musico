@@ -111,7 +111,7 @@ export const AdminLayout: React.FC<{ children: React.ReactNode; onPreviewStudent
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
           <div className="text-xs text-zinc-500 hidden sm:block">
-            Painel administrativo — Supabase Auth conectado.
+            Painel administrativo
           </div>
           <div className="text-[10px] font-mono text-cyan-400 border border-cyan-500/20 px-2 py-1 rounded-full">
             {user?.role?.toUpperCase()}
