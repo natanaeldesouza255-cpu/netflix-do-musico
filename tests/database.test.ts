@@ -10,9 +10,19 @@ beforeAll(async()=>{
  await db.exec(`create role anon; create role authenticated; create schema auth;
  create table auth.users(id uuid primary key,email text,raw_app_meta_data jsonb default '{}',raw_user_meta_data jsonb default '{}');
  create function auth.uid() returns uuid language sql stable as $$ select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid $$;
+ alter default privileges in schema public grant all on tables to anon,authenticated;
+ create table public.courses(id bigint primary key,name text,visible boolean);
+ insert into public.courses values(1,'Visible',true),(2,'Hidden',false);
+ create table public.profiles(id bigint primary key,email text,role text);
+ alter table public.profiles enable row level security;
+ create table public.platform_settings(id text primary key);
+ alter table public.platform_settings enable row level security;
+ create policy "platform settings authenticated update" on public.platform_settings for update to authenticated using(true) with check(true);
+ create policy "platform settings authenticated write" on public.platform_settings for insert to authenticated with check(true);
  grant usage on schema auth to anon,authenticated; grant execute on function auth.uid() to anon,authenticated;
  insert into auth.users(id,email,raw_app_meta_data) values ('${admin}','admin@test.invalid','{"role":"admin"}'),('${alice}','alice@test.invalid','{}'),('${bob}','bob@test.invalid','{}');`);
- await db.exec(readFileSync('supabase/migrations/20261006173000_secure_platform.sql','utf8'));
+ await db.exec(readFileSync('supabase/migrations/20261006233738_secure_platform.sql','utf8'));
+ await db.exec(readFileSync('supabase/migrations/20261006233921_harden_database_grants.sql','utf8'));
  await db.exec(`update ndm_profiles set subscription_status='active' where id='${alice}';
  insert into ndm_records(kind,id,data) values ('course','course1','{"title":"Published","status":"published"}'),('course','draft1','{"status":"draft"}');
  insert into ndm_records(kind,id,data) values ('module','module1','{"courseId":"course1"}'),('module','draftmodule','{"courseId":"draft1"}');
@@ -95,4 +105,12 @@ it('rejects executable and untrusted video URLs in student posts',async()=>{
  await asUser(alice,async()=>{
   await expect(db.query("insert into ndm_records(kind,id,author_id,data) values('post','unsafe',$1,$2)",[alice,{content:'unsafe',videoUrl:'javascript:parent.alert(1)',moderationStatus:'visible'}])).rejects.toThrow();
  });
+});
+
+it('removes inherited destructive grants and protects legacy course visibility',async()=>{
+ const {rows}=await db.query<any>("select has_table_privilege('anon','ndm_progress','TRUNCATE') as truncate,has_column_privilege('authenticated','ndm_profiles','role','UPDATE') as role_update");
+ expect(rows[0]).toEqual({truncate:false,role_update:false});
+ await db.exec('set role anon');
+ try {expect((await db.query<any>('select name from courses')).rows).toEqual([{name:'Visible'}]); await expect(db.exec("delete from courses")).rejects.toThrow();}
+ finally {await db.exec('reset role');}
 });
