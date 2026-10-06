@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
+﻿import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import type { Lesson, Equipment, LiveSession, MarketplaceItem, CommunityPost, Course, CourseModule, MusicCategory, MusicLevel } from '../data/mockData';
 import type { ActivityLog, ManagedUser, PaymentRecord, PlatformSettings } from '../data/seedPlatform';
 import { defaultSettings } from '../data/seedPlatform';
@@ -177,7 +177,7 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   const {watchedHistory,completedLessons,favoriteLessons,favoriteEquipments,aiCalendar}=snapshot.progress;
 
   const refreshData=useCallback(async ():Promise<boolean>=>{
-    if(!supabase) {setDataError('Configure a conexão com o Supabase para utilizar a plataforma.');setAuthLoading(false);return false;}
+    if(!supabase) {setDataError('Configure a conexÃ£o com o Supabase para utilizar a plataforma.');setAuthLoading(false);return false;}
     const request=++generation.current;
     let preserveConfirmed=state.current.settingsVersion>0;
     try {
@@ -200,9 +200,9 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
       return true;
     } catch(error) {
       if(alive.current && request===generation.current) {
-        const message=error instanceof Error?error.message:'Não foi possível carregar os dados. Tente novamente.';
+        const message=error instanceof Error?error.message:'NÃ£o foi possÃ­vel carregar os dados. Tente novamente.';
         if(preserveConfirmed && state.current.settingsVersion>0){
-          setDataWarning('Não foi possível atualizar os dados. Seus rascunhos foram preservados. Tente atualizar novamente.');
+          setDataWarning('NÃ£o foi possÃ­vel atualizar os dados. Seus rascunhos foram preservados. Tente atualizar novamente.');
         }else{
           setSnapshot(emptySnapshot());state.current=emptySnapshot();setDataWarning(null);setDataError(message);
         }
@@ -238,7 +238,7 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     const feature=screenFeature[screen];return !feature||isFeatureEnabled(settings,feature);
   };
   const navigateTo=(screen:ScreenName,params:any=null)=>{
-    if(!allowed(screen)){showToast('error','Esta área não está disponível para sua conta.');return;}
+    if(!allowed(screen)){showToast('error','Esta Ã¡rea nÃ£o estÃ¡ disponÃ­vel para sua conta.');return;}
     setHistoryStack(prev=>[...prev,{screen:currentScreen,params:screenParams}]);setCurrentScreen(screen);setScreenParams(params);
   };
   const goBack=()=>{
@@ -250,23 +250,23 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   },[user,settings,currentScreen,isSubscriber]);
 
   const loginUser=async(email:string,password:string)=>{
-    if(!supabase){showToast('error','Supabase não está configurado.');return false;}
+    if(!supabase){showToast('error','Supabase nÃ£o estÃ¡ configurado.');return false;}
     signingIn.current=true;
     try {
       const {error}=await supabase.auth.signInWithPassword({email:email.trim().toLowerCase(),password});
-      if(error){showToast('error','E-mail ou senha inválidos, ou serviço indisponível.');return false;}
+      if(error){showToast('error','E-mail ou senha invÃ¡lidos, ou serviÃ§o indisponÃ­vel.');return false;}
       const ok=await refreshData();
       const profile=state.current.user;
       if(!ok||!profile||profile.status!=='active'){
-        await supabase.auth.signOut();showToast('error','Conta indisponível. Contate o administrador.');return false;
+        await supabase.auth.signOut();showToast('error','Conta indisponÃ­vel. Contate o administrador.');return false;
       }
       setCurrentScreen(profile.role==='admin'?'AdminDashboard':'MemberHome');setHistoryStack([]);return true;
-    }catch{showToast('error','Não foi possível entrar. Tente novamente.');return false;}finally{signingIn.current=false;}
+    }catch{showToast('error','NÃ£o foi possÃ­vel entrar. Tente novamente.');return false;}finally{signingIn.current=false;}
   };
   const logoutUser=async()=>{
     if(!supabase)return;
     const {error}=await supabase.auth.signOut();
-    if(error){showToast('error','Não foi possível encerrar a sessão. Tente novamente.');return;}
+    if(error){showToast('error','NÃ£o foi possÃ­vel encerrar a sessÃ£o. Tente novamente.');return;}
     ++generation.current;setSnapshot(emptySnapshot());state.current=emptySnapshot();setCurrentScreen('Login');setHistoryStack([]);setScreenParams(null);setSearchQuery('');
   };
   const registerUser=async(email:string,password:string,name:string,instrument:string)=>{
@@ -274,8 +274,8 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     try {
       const {error}=await supabase.auth.signUp({email:email.trim().toLowerCase(),password,options:{data:{name,instrument}}});
       if(error)throw error;
-      showToast('success','Cadastro recebido. Confira seu e-mail; o acesso depende da ativação da assinatura.');return true;
-    }catch{showToast('error','Não foi possível concluir o cadastro. Tente novamente.');return false;}
+      showToast('success','Cadastro recebido. Confira seu e-mail; o acesso depende da ativaÃ§Ã£o da assinatura.');return true;
+    }catch{showToast('error','NÃ£o foi possÃ­vel concluir o cadastro. Tente novamente.');return false;}
   };
   const finishRecovery=async()=>{recovery.current=false;setIsRecovery(false);await logoutUser();};
 
@@ -304,12 +304,12 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
       });
   },[snapshot.records]);
 
-  const mutate=async(action:()=>Promise<void>,message='Alterações salvas.'):Promise<boolean>=>{
+  const mutate=async(action:()=>Promise<void>,message='AlteraÃ§Ãµes salvas.'):Promise<boolean>=>{
     if(dataWarning){showToast('error','Atualize os dados antes de salvar. Seu rascunho foi preservado.');return false;}
-    if(!supabase||saving.current){showToast('error','Aguarde a operação atual terminar.');return false;}
+    if(!supabase||saving.current){showToast('error','Aguarde a operaÃ§Ã£o atual terminar.');return false;}
     saving.current=true;setIsSaving(true);
-    try{await action();const refreshed=await refreshData();if(!refreshed)throw new Error('Operação enviada, mas não foi possível conferir o resultado. Atualize antes de tentar novamente.');showToast('success',message);return true;}
-    catch(error){showToast('error',error instanceof Error?error.message:'Não foi possível salvar.');return false;}
+    try{await action();const refreshed=await refreshData();if(!refreshed)throw new Error('OperaÃ§Ã£o enviada, mas nÃ£o foi possÃ­vel conferir o resultado. Atualize antes de tentar novamente.');showToast('success',message);return true;}
+    catch(error){showToast('error',error instanceof Error?error.message:'NÃ£o foi possÃ­vel salvar.');return false;}
     finally{saving.current=false;setIsSaving(false);}
   };
   const change=(kind:RecordKind,id:string,data?:any)=>({kind,id,op:data?'upsert':'delete',version:state.current.records.find(row=>row.kind===kind&&row.id===id)?.version||0,...(data?{data}: {})});
@@ -324,9 +324,26 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   };
   const deleteRecord=async(kind:RecordKind,id:string)=>{
     if(user?.role!=='admin')return;
-    await mutate(()=>commitRecords(supabase!,[change(kind,id)]),'Conteúdo excluído.');
+    await mutate(()=>commitRecords(supabase!,[change(kind,id)]),'ConteÃºdo excluÃ­do.');
   };
-  const reorder=async(kind:'module'|'lesson',id:string,direction:'up'|'down')=>{
+  const deleteCourseCascade=async(id:string)=>{
+    if(user?.role!=='admin')return;
+    const moduleIds=state.current.records.filter(row=>row.kind==='module'&&row.data.courseId===id).map(row=>row.id);
+    const changes=[
+      ...state.current.records.filter(row=>row.kind==='lesson'&&(row.data.courseId===id||moduleIds.includes(row.data.moduleId))).map(row=>change('lesson',row.id)),
+      ...moduleIds.map(moduleId=>change('module',moduleId)),
+      change('course',id),
+    ];
+    await mutate(()=>commitRecords(supabase!,changes),'Curso e conteudo relacionado excluidos.');
+  };
+  const deleteModuleCascade=async(id:string)=>{
+    if(user?.role!=='admin')return;
+    const changes=[
+      ...state.current.records.filter(row=>row.kind==='lesson'&&row.data.moduleId===id).map(row=>change('lesson',row.id)),
+      change('module',id),
+    ];
+    await mutate(()=>commitRecords(supabase!,changes),'Modulo e aulas relacionados excluidos.');
+  };  const reorder=async(kind:'module'|'lesson',id:string,direction:'up'|'down')=>{
     const current=state.current.records.find(row=>row.kind===kind&&row.id===id);if(!current)return;
     const parent=kind==='module'?'courseId':'moduleId';
     const siblings=state.current.records.filter(row=>row.kind===kind&&row.data[parent]===current.data[parent]).sort((a,b)=>(a.data.order||0)-(b.data.order||0));
@@ -334,11 +351,11 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     [siblings[i],siblings[j]]=[siblings[j],siblings[i]];
     await mutate(()=>commitRecords(supabase!,siblings.map((row,index)=>change(kind,row.id,{...row.data,order:index}))));
   };
-  const saveCourse=(input:Partial<Course>&{title:string})=>saveRecord('course',input,{description:'',category:'Violão',instructor:'',level:'Nível Zero',coverImage:'',status:'draft',displayOrder:courses.length});
+  const saveCourse=(input:Partial<Course>&{title:string})=>saveRecord('course',input,{description:'',category:'ViolÃ£o',instructor:'',level:'NÃ­vel Zero',coverImage:'',status:'draft',displayOrder:courses.length});
   const saveModule=(input:Partial<CourseModule>&{courseId:string;name:string})=>saveRecord('module',input,{description:'',order:modules.filter(m=>m.courseId===input.courseId).length});
   const saveLesson=(input:Partial<Lesson>&{title:string;courseId:string;moduleId:string})=>{
     const course=courses.find(c=>c.id===input.courseId);
-    return saveRecord('lesson',input,{description:'',duration:'',videoUrl:'',thumbnail:course?.coverImage||'',category:course?.category||'Violão',level:course?.level||'Nível Zero',isFree:false,status:'draft',order:catalogLessons.filter(l=>l.moduleId===input.moduleId).length});
+    return saveRecord('lesson',input,{description:'',duration:'',videoUrl:'',thumbnail:course?.coverImage||'',category:course?.category||'ViolÃ£o',level:course?.level||'NÃ­vel Zero',isFree:false,status:'draft',order:catalogLessons.filter(l=>l.moduleId===input.moduleId).length});
   };
   const saveLive=(input:Partial<LiveSession>&{title:string})=>saveRecord('live',input,{presenter:'',date:'',time:'',status:'scheduled'});
   const saveMarketplaceItem=(input:Partial<MarketplaceItem>&{name:string})=>saveRecord('marketplace',input,{type:'Cursos',price:0,description:'',thumbnail:'',status:'inactive'});
@@ -348,12 +365,12 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   const setPostModeration=async(id:string,status:CommunityPost['moderationStatus'])=>{await saveRecord('post',{id,moderationStatus:status});};
   const importLegacyContent=async()=>{
     if(user?.role!=='admin')return false;
-    return mutate(async()=>{const changes=legacyChanges(localStorage,state.current.records);if(!changes.length)throw new Error('Não há conteúdo local novo para importar.');await commitRecords(supabase!,changes);},'Conteúdo importado para o Supabase.');
+    return mutate(async()=>{const changes=legacyChanges(localStorage,state.current.records);if(!changes.length)throw new Error('NÃ£o hÃ¡ conteÃºdo local novo para importar.');await commitRecords(supabase!,changes);},'ConteÃºdo importado para o Supabase.');
   };
   const saveSettings=async(updated:Partial<PlatformSettings>)=>{
     if(user?.role!=='admin')return false;
     const {_revision,...data}={...state.current.settings,...updated};
-    return mutate(()=>saveVersioned(supabase!,'ndm_settings','main',data,updated._revision ?? state.current.settingsVersion),'Configurações salvas no Supabase.');
+    return mutate(()=>saveVersioned(supabase!,'ndm_settings','main',data,updated._revision ?? state.current.settingsVersion),'ConfiguraÃ§Ãµes salvas no Supabase.');
   };
   const saveStudent=async(input:Partial<ManagedUser>&{id?:string})=>{
     if(!input.id||user?.role!=='admin')return false;
@@ -361,7 +378,7 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     return mutate(async()=>{
       const {_revision,role,status,subscriptionStatus,id,email,createdAt,...data}={...existing,...input};
       const result=await supabase!.from('ndm_profiles').update({status,subscription_status:subscriptionStatus,data,version:(_revision||1)+1}).eq('id',id).eq('version',_revision||1).select('id').single();
-      if(result.error||!result.data)throw new Error('Não foi possível salvar o aluno.');
+      if(result.error||!result.data)throw new Error('NÃ£o foi possÃ­vel salvar o aluno.');
     });
   };
   const toggleStudentStatus=async(id:string)=>{const student=students.find(s=>s.id===id);if(student)await saveStudent({id,status:student.status==='active'?'inactive':'active'});};
@@ -370,7 +387,7 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     return mutate(async()=>{const {error}=await supabase!.rpc('ndm_update_profile',{changes:updated});if(error)throw error;});
   };
   const saveProgress=async(update:(prev:Progress)=>Progress)=>{
-    if(!isSubscriber){showToast('error','A prévia não altera o progresso. É necessário um aluno com assinatura ativa.');return;}
+    if(!isSubscriber){showToast('error','A prÃ©via nÃ£o altera o progresso. Ã‰ necessÃ¡rio um aluno com assinatura ativa.');return;}
     await mutate(()=>saveVersioned(supabase!,'ndm_progress',user!.id,update(state.current.progress),state.current.progressVersion));
   };
   const toggle=(list:string[],id:string)=>list.includes(id)?list.filter(x=>x!==id):[...list,id];
@@ -384,18 +401,18 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
   };
   const interact=async(kind:'post'|'equipment',id:string,action:string,data:any={})=>{
     if(!isSubscriber){showToast('error','Entre como aluno com assinatura ativa para interagir.');return false;}
-    return mutate(async()=>{const {error}=await supabase!.from('ndm_interactions').insert({record_kind:kind,record_id:id,author_id:user!.id,action,data:{...data,name:user!.name,instrument:user!.instrument}});if(error)throw new Error(error.code==='23505'?'Você já realizou esta ação.':error.message);});
+    return mutate(async()=>{const {error}=await supabase!.from('ndm_interactions').insert({record_kind:kind,record_id:id,author_id:user!.id,action,data:{...data,name:user!.name,instrument:user!.instrument}});if(error)throw new Error(error.code==='23505'?'VocÃª jÃ¡ realizou esta aÃ§Ã£o.':error.message);});
   };
   const generateStudyCalendar = (routine: string, hours: string, availability: string, goal: string) => {
-    const dias = ['Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
+    const dias = ['Segunda-feira', 'TerÃ§a-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'SÃ¡bado', 'Domingo'];
     const hrs = parseInt(hours) || 4;
-    const minDiarios = Math.round((hrs * 60) / (availability.toLowerCase() === 'diária' ? 7 : availability.toLowerCase() === 'finais de semana' ? 2 : 4));
+    const minDiarios = Math.round((hrs * 60) / (availability.toLowerCase() === 'diÃ¡ria' ? 7 : availability.toLowerCase() === 'finais de semana' ? 2 : 4));
     const agenda: any[] = [];
 
     dias.forEach((dia, index) => {
       let treina = false;
-      if (availability.toLowerCase() === 'diária') treina = true;
-      else if (availability.toLowerCase() === 'finais de semana' && (dia === 'Sábado' || dia === 'Domingo')) treina = true;
+      if (availability.toLowerCase() === 'diÃ¡ria') treina = true;
+      else if (availability.toLowerCase() === 'finais de semana' && (dia === 'SÃ¡bado' || dia === 'Domingo')) treina = true;
       else if (availability.toLowerCase() === '3 vezes na semana' && (index === 0 || index === 2 || index === 4)) treina = true;
       else if (availability.toLowerCase() === '4 vezes na semana' && (index === 0 || index === 1 || index === 3 || index === 4)) treina = true;
 
@@ -407,24 +424,24 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
         agenda.push({
           dia,
           estudar: true,
-          foco: index % 2 === 0 ? 'Técnica e Repertório' : 'Teoria e Produção',
+          foco: index % 2 === 0 ? 'TÃ©cnica e RepertÃ³rio' : 'Teoria e ProduÃ§Ã£o',
           tempoTotal: `${minDiarios} min`,
           divisao: [
-            { tarefa: 'Aquecimento e Técnica Dedos', tempo: `${tempoTec} min` },
+            { tarefa: 'Aquecimento e TÃ©cnica Dedos', tempo: `${tempoTec} min` },
             { tarefa: `Estudo de Teoria / Harmonias para ${goal}`, tempo: `${tempoTeo} min` },
-            { tarefa: 'Aplicação prática no Repertório', tempo: `${tempoRep} min` },
-            { tarefa: 'Gravação de evolução ou Improviso', tempo: `${tempoCri} min` },
+            { tarefa: 'AplicaÃ§Ã£o prÃ¡tica no RepertÃ³rio', tempo: `${tempoRep} min` },
+            { tarefa: 'GravaÃ§Ã£o de evoluÃ§Ã£o ou Improviso', tempo: `${tempoCri} min` },
           ],
         });
       } else {
         agenda.push({
           dia,
           estudar: false,
-          foco: 'Descanso e Audição Ativa',
+          foco: 'Descanso e AudiÃ§Ã£o Ativa',
           tempoTotal: '0 min',
           divisao: [
-            { tarefa: 'Ouvir discos novos de referência', tempo: '15 min' },
-            { tarefa: 'Descanso de articulações e ouvidos', tempo: 'Completo' },
+            { tarefa: 'Ouvir discos novos de referÃªncia', tempo: '15 min' },
+            { tarefa: 'Descanso de articulaÃ§Ãµes e ouvidos', tempo: 'Completo' },
           ],
         });
       }
@@ -438,19 +455,20 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
       generatedSchedule: {
         cronograma: agenda,
         metasSemanais: [
-          'Aumentar velocidade de treino em 5 BPM utilizando metrônomo',
-          'Gravar 1 vídeo de evolução no final de semana para postar na Comunidade',
+          'Aumentar velocidade de treino em 5 BPM utilizando metrÃ´nomo',
+          'Gravar 1 vÃ­deo de evoluÃ§Ã£o no final de semana para postar na Comunidade',
           'Concluir pelo menos 2 aulas na categoria escolhida',
         ],
         tempoTreino: `${hrs} horas por semana`,
         frequenciaRecomendada: `${availability}`,
-        dicaIA: `Músico, dado seu objetivo de '${goal}', nossa IA recomenda focar os primeiros 10 minutos de cada sessão exclusivamente em micro-treinos de técnica lenta no metrônomo para solidificar postura. Não pule o dia de descanso auditivo!`,
+        dicaIA: `MÃºsico, dado seu objetivo de '${goal}', nossa IA recomenda focar os primeiros 10 minutos de cada sessÃ£o exclusivamente em micro-treinos de tÃ©cnica lenta no metrÃ´nomo para solidificar postura. NÃ£o pule o dia de descanso auditivo!`,
       },
     }}));
   };
 
   return <AppContext.Provider value={{importLegacyContent,user,isSubscriber,authLoading,dataError,dataWarning,isSaving,isRecovery,refreshData,finishRecovery,registerUser,
     currentScreen,screenParams,historyStack,watchedHistory,completedLessons,favoriteLessons,favoriteEquipments,communityFeed,equipments,catalogLessons,courses,modules,lives,marketplaceItems,students,payments,settings,activities,toast,aiCalendar,searchQuery,setSearchQuery,navigateTo,goBack,loginUser,logoutUser,updateProfile,toggleLessonComplete,toggleLessonFavorite,toggleEquipmentFavorite,addToWatchedHistory,createNewPost,
-    likePost:(id)=>{void interact('post',id,'like');},addCommentToPost:(id,text)=>interact('post',id,'comment',{text}),addCommentToEquipment:(id,rating,text)=>interact('equipment',id,'review',{rating,text}),generateStudyCalendar,reportPost:(id)=>{void interact('post',id,'report');},showToast,clearToast:()=>setToast(null),publishedLessons,publishedCourses,saveCourse,deleteCourse:(id)=>{void deleteRecord('course',id);},toggleCoursePublish,saveModule,deleteModule:(id)=>{void deleteRecord('module',id);},moveModule:(id,d)=>{void reorder('module',id,d);},saveLesson,deleteLesson:(id)=>{void deleteRecord('lesson',id);},moveLesson:(id,d)=>{void reorder('lesson',id,d);},toggleLessonPublish,saveLive,deleteLive:(id)=>{void deleteRecord('live',id);},saveMarketplaceItem,deleteMarketplaceItem:(id)=>{void deleteRecord('marketplace',id);},saveEquipment,deleteEquipment:(id)=>{void deleteRecord('equipment',id);},deleteCommunityPost:(id)=>{void deleteRecord('post',id);},setPostModeration,saveStudent,toggleStudentStatus,saveSettings}}>{children}</AppContext.Provider>;
+    likePost:(id)=>{void interact('post',id,'like');},addCommentToPost:(id,text)=>interact('post',id,'comment',{text}),addCommentToEquipment:(id,rating,text)=>interact('equipment',id,'review',{rating,text}),generateStudyCalendar,reportPost:(id)=>{void interact('post',id,'report');},showToast,clearToast:()=>setToast(null),publishedLessons,publishedCourses,saveCourse,deleteCourse:(id)=>{void deleteCourseCascade(id);},toggleCoursePublish,saveModule,deleteModule:(id)=>{void deleteModuleCascade(id);},moveModule:(id,d)=>{void reorder('module',id,d);},saveLesson,deleteLesson:(id)=>{void deleteRecord('lesson',id);},moveLesson:(id,d)=>{void reorder('lesson',id,d);},toggleLessonPublish,saveLive,deleteLive:(id)=>{void deleteRecord('live',id);},saveMarketplaceItem,deleteMarketplaceItem:(id)=>{void deleteRecord('marketplace',id);},saveEquipment,deleteEquipment:(id)=>{void deleteRecord('equipment',id);},deleteCommunityPost:(id)=>{void deleteRecord('post',id);},setPostModeration,saveStudent,toggleStudentStatus,saveSettings}}>{children}</AppContext.Provider>;
 };
 export const useApp=()=>{const context=useContext(AppContext);if(!context)throw new Error('useApp deve ser usado com um AppProvider');return context;};
+
