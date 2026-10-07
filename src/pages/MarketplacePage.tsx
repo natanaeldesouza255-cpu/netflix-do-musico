@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { MarketplaceItem } from '../data/mockData';
 import { ShoppingBag, ArrowRight, X, ShieldCheck, Sparkles, CreditCard, CheckCircle, Tag } from 'lucide-react';
@@ -18,6 +18,16 @@ export const MarketplacePage: React.FC = () => {
     ? activeItems
     : activeItems.filter(item => item.type === activeFilter);
 
+  // Mantem o checkout sincronizado com alteracoes feitas pelo Admin.
+  useEffect(() => {
+    if (!selectedProduct) return;
+    const updated = activeItems.find(item => item.id === selectedProduct.id);
+    setSelectedProduct(updated || null);
+    if (!updated) {
+      setCheckoutComplete(false);
+      setIsProcessing(false);
+    }
+  }, [marketplaceItems, selectedProduct?.id]);
   const handleOpenCheckout = (product: MarketplaceItem) => {
     setSelectedProduct(product);
     setCheckoutComplete(false);
@@ -29,14 +39,14 @@ export const MarketplacePage: React.FC = () => {
     if (!selectedProduct) return;
 
     setIsProcessing(true);
-    // Simula processamento da transação financeira de teste
+    // Simula processamento da transaÃ§Ã£o financeira de teste
     setTimeout(() => {
       setIsProcessing(false);
       setCheckoutComplete(true);
       
       // Se estiver logado, ganha XP por investir na carreira!
       if (user) {
-        // Incrementamos XP de forma fictícia no contexto global
+        // Incrementamos XP de forma fictÃ­cia no contexto global
         user.xp += 150;
       }
     }, 2000);
@@ -45,7 +55,7 @@ export const MarketplacePage: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 flex flex-col gap-6" id="marketplace-page-root">
       
-      {/* CABEÇALHO */}
+      {/* CABEÃ‡ALHO */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-4">
         <div>
           <h2 className="font-heading text-lg sm:text-2xl font-bold text-white tracking-wide flex items-center gap-2">
@@ -53,7 +63,7 @@ export const MarketplacePage: React.FC = () => {
             Marketplace de Presets & VSTs
           </h2>
           <p className="text-xs text-zinc-500 mt-1">
-            Turbine seu áudio e estúdio. Encontre presets de amplificadores, sample packs de baterias reais microfonadas e VSTs exclusivos de produção.
+            Turbine seu Ã¡udio e estÃºdio. Encontre presets de amplificadores, sample packs de baterias reais microfonadas e VSTs exclusivos de produÃ§Ã£o.
           </p>
         </div>
       </div>
@@ -117,10 +127,10 @@ export const MarketplacePage: React.FC = () => {
               </div>
             </div>
 
-            {/* Preço e Botão */}
+            {/* PreÃ§o e BotÃ£o */}
             <div className="p-4 pt-0 mt-2 flex items-center justify-between border-t border-zinc-900/40">
               <div className="text-left">
-                <span className="text-[9px] text-zinc-550 block uppercase tracking-widest leading-none">Preço Único</span>
+                <span className="text-[9px] text-zinc-550 block uppercase tracking-widest leading-none">PreÃ§o Ãšnico</span>
                 <span className="text-base font-black text-white font-mono block mt-1">
                   R$ {item.price.toFixed(2).replace('.', ',')}
                 </span>
@@ -131,7 +141,7 @@ export const MarketplacePage: React.FC = () => {
                 className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-[11px] px-4 py-2 rounded-lg flex items-center gap-1.5 transition duration-300 focus:outline-none"
                 id={`btn-buy-mkt-${item.id}`}
               >
-                Comprar Licença
+                Comprar LicenÃ§a
                 <ArrowRight className="h-3.5 w-3.5" />
               </button>
             </div>
@@ -145,13 +155,13 @@ export const MarketplacePage: React.FC = () => {
         <div className="inline-flex h-9 w-9 bg-purple-500/10 border border-purple-500/20 text-purple-400 items-center justify-center rounded-lg">
           <Sparkles className="h-5 w-5 fill-purple-550/10" />
         </div>
-        <h3 className="font-heading text-sm sm:text-base font-bold text-white uppercase tracking-wider">Você é produtor ou criador de VSTs/Sample Packs?</h3>
+        <h3 className="font-heading text-sm sm:text-base font-bold text-white uppercase tracking-wider">VocÃª Ã© produtor ou criador de VSTs/Sample Packs?</h3>
         <p className="text-xs text-zinc-400 max-w-xl leading-relaxed">
-          Em breve abriremos inscrições para que professores e produtores parceiros possam vender seus próprios presets de amplificadores e timbres de Reaper diretamente na nossa vitrine, monetizando seu conhecimento!
+          Em breve abriremos inscriÃ§Ãµes para que professores e produtores parceiros possam vender seus prÃ³prios presets de amplificadores e timbres de Reaper diretamente na nossa vitrine, monetizando seu conhecimento!
         </p>
       </section>
 
-      {/* MODAL CHECKOUT DE SIMULAÇÃO */}
+      {/* MODAL CHECKOUT DE SIMULAÃ‡ÃƒO */}
       {selectedProduct && (
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4 sm:p-6">
           <div className="w-full max-w-md glass-panel border border-zinc-800 rounded-2xl overflow-hidden relative shadow-2xl animate-scale-up text-left">
@@ -178,16 +188,16 @@ export const MarketplacePage: React.FC = () => {
                   <CheckCircle className="h-6.5 w-6.5 fill-green-950/15" />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white">Transação Simulada Efetuada!</h3>
+                  <h3 className="text-base font-extrabold text-white">TransaÃ§Ã£o Simulada Efetuada!</h3>
                   <p className="text-xs text-zinc-400 mt-2 leading-relaxed max-w-xs mx-auto">
-                    Parabéns! Sua licença digital para o produto <strong className="text-white">"{selectedProduct.name}"</strong> foi ativada.
+                    ParabÃ©ns! Sua licenÃ§a digital para o produto <strong className="text-white">"{selectedProduct.name}"</strong> foi ativada.
                   </p>
                   <p className="text-[10px] text-zinc-550 leading-relaxed max-w-xs mx-auto mt-2">
                     Os arquivos zip, chaves seriais de VST e presets de Reaper foram enviados para seu e-mail cadastrado.
                   </p>
                 </div>
                 <div className="bg-purple-950/40 border border-purple-500/20 text-purple-300 text-[10px] font-bold px-3.5 py-1 rounded-full font-mono">
-                  🚀 +150 XP de Evolução Musical Recebidos!
+                  ðŸš€ +150 XP de EvoluÃ§Ã£o Musical Recebidos!
                 </div>
                 <button
                   onClick={() => setSelectedProduct(null)}
@@ -198,7 +208,7 @@ export const MarketplacePage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              // Formulário de Pagamento Mock
+              // FormulÃ¡rio de Pagamento Mock
               <form onSubmit={handleCheckoutSubmit} className="p-5 flex flex-col gap-4">
                 
                 {/* Resumo do Pedido */}
@@ -217,22 +227,22 @@ export const MarketplacePage: React.FC = () => {
                 <div className="flex flex-col gap-3">
                   {/* Nome titular */}
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Titular do Cartão (Simulação)</label>
+                    <label className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Titular do CartÃ£o (SimulaÃ§Ã£o)</label>
                     <input 
                       type="text"
-                      placeholder="Músico Estudante da Silva"
+                      placeholder="MÃºsico Estudante da Silva"
                       className="rounded-lg bg-zinc-950 border border-zinc-800 text-xs px-3.5 py-2 text-zinc-200 placeholder-zinc-600 focus:border-purple-400 focus:outline-none transition"
                       required
                       id="input-card-name"
                     />
                   </div>
 
-                  {/* Número Cartão */}
+                  {/* NÃºmero CartÃ£o */}
                   <div className="flex flex-col gap-1">
-                    <label className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">Número do Cartão de Crédito</label>
+                    <label className="text-[9px] font-bold uppercase tracking-wider text-zinc-400">NÃºmero do CartÃ£o de CrÃ©dito</label>
                     <input 
                       type="text"
-                      placeholder="4000 1234 5678 9010 (Qualquer número funciona)"
+                      placeholder="4000 1234 5678 9010 (Qualquer nÃºmero funciona)"
                       className="rounded-lg bg-zinc-950 border border-zinc-800 text-xs px-3.5 py-2 text-zinc-200 placeholder-zinc-650 focus:border-purple-400 focus:outline-none transition"
                       required
                       id="input-card-number"
@@ -267,7 +277,7 @@ export const MarketplacePage: React.FC = () => {
                 <div className="text-[9px] text-zinc-550 leading-relaxed flex items-start gap-1 p-2 bg-zinc-950 rounded-lg border border-zinc-900">
                   <ShieldCheck className="h-4.5 w-4.5 text-cyan-400 flex-shrink-0 mt-0.5" />
                   <span>
-                    Ambiente de simulação 100% seguro. Nenhum dado financeiro real é enviado ou debitado do seu cartão neste MVP.
+                    Ambiente de simulaÃ§Ã£o 100% seguro. Nenhum dado financeiro real Ã© enviado ou debitado do seu cartÃ£o neste MVP.
                   </span>
                 </div>
 
@@ -280,7 +290,7 @@ export const MarketplacePage: React.FC = () => {
                   {isProcessing ? (
                     <>
                       <div className="h-3.5 w-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      Processando transação criptografada...
+                      Processando transaÃ§Ã£o criptografada...
                     </>
                   ) : (
                     <>
@@ -300,3 +310,4 @@ export const MarketplacePage: React.FC = () => {
   );
 };
 export default MarketplacePage;
+
