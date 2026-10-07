@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp, ScreenName } from '../context/AppContext';
 import {
   Search,
@@ -75,13 +75,16 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
   const isEnabled = (id: string) => adminVisibility.get(id) !== false;
   const results = getSearchResults();
 
+  const menuLabel = (id: string, fallback: string) =>
+    settings.adminMenu?.find((item) => item.id === id)?.label?.trim() || fallback;
+
   const navItems = [
     { label: 'Início', screen: 'MemberHome' as const, icon: Compass },
-    { label: 'Aulas', screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
-    ...(isEnabled('community') ? [{ label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users }] : []),
-    ...(isEnabled('lives') ? [{ label: 'Lives', screen: 'LivePage' as const, icon: Radio }] : []),
-    ...(isEnabled('marketplace') ? [{ label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag }] : []),
-    ...(isEnabled('equipment') ? [{ label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award }] : []),
+    { label: menuLabel('courses', 'Aulas'), screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
+    ...(isEnabled('community') ? [{ label: menuLabel('community', 'Comunidade'), screen: 'CommunityPage' as const, icon: Users }] : []),
+    ...(isEnabled('lives') ? [{ label: menuLabel('lives', 'Lives'), screen: 'LivePage' as const, icon: Radio }] : []),
+    ...(isEnabled('marketplace') ? [{ label: menuLabel('marketplace', 'Marketplace'), screen: 'MarketplacePage' as const, icon: ShoppingBag }] : []),
+    ...(isEnabled('equipment') ? [{ label: menuLabel('equipment', 'Equipamentos'), screen: 'EquipmentReviews' as const, icon: Award }] : []),
     { label: 'Evolução', screen: 'StudentProfile' as const, icon: TrendingUp }
   ];
 
@@ -98,7 +101,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
             NETFLIX
           </span>
           <span className="text-xs sm:text-sm font-light text-cyan-400 border border-cyan-400/30 px-1.5 py-0.5 rounded uppercase tracking-widest bg-cyan-950/40">
-            do Músico
+            do MÃºsico
           </span>
         </button>
 
@@ -208,7 +211,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                 onClick={() => navigateTo('PublicHome')}
                 className={`text-sm font-medium transition ${currentScreen === 'PublicHome' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
               >
-                Início Público
+                InÃ­cio PÃºblico
               </button>
               <button
                 onClick={() => navigateTo('Login')}
@@ -222,7 +225,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
           )}
         </div>
 
-        {/* BOTÃO MOBILE */}
+        {/* BOTÃƒO MOBILE */}
         <div className="flex items-center gap-3 lg:hidden">
           {showSubscriberUi && (
             <div className="flex items-center gap-1.5 text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">
@@ -348,7 +351,7 @@ export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) =
                 }}
                 className={`p-2.5 rounded-lg text-left text-sm font-medium ${currentScreen === 'PublicHome' ? 'bg-zinc-800 text-white' : 'text-zinc-400'}`}
               >
-                Início Público
+                InÃ­cio PÃºblico
               </button>
               <button
                 onClick={() => {
