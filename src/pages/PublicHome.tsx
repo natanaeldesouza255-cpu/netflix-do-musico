@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Lesson } from '../data/mockData';
 import { VideoCard } from '../components/VideoCard';
 import { Sparkles, Music, Shield, Play, X, UserCheck, Flame } from 'lucide-react';
 
 export const PublicHome: React.FC = () => {
-  const { navigateTo, publishedLessons } = useApp();
+  const { navigateTo, publishedLessons, settings } = useApp();
   const [selectedPreview, setActivePreview] = useState<Lesson | null>(null);
 
-  // A vitrine pública acompanha o conteúdo publicado pelo Admin.
+  // A vitrine pÃºblica acompanha o conteÃºdo publicado pelo Admin.
   const freeLessons = publishedLessons.filter(lesson => lesson.isFree);
   const activePreview = freeLessons.find(lesson => lesson.id === selectedPreview?.id) || null;
 
@@ -19,7 +19,7 @@ export const PublicHome: React.FC = () => {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 flex flex-col gap-10" id="public-home-root">
       
-      {/* 1. HERO BANNER - CHAMADA PARA AÇÃO (CTA) */}
+      {/* 1. HERO BANNER - CHAMADA PARA AÃ‡ÃƒO (CTA) */}
       <section className="relative glass-panel rounded-2xl p-6 sm:p-12 border border-zinc-800 text-center overflow-hidden flex flex-col items-center justify-center gap-4">
         {/* Fundo decorativo animado */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-purple-900/10 via-black to-cyan-900/10" />
@@ -27,18 +27,18 @@ export const PublicHome: React.FC = () => {
 
         <div className="flex items-center gap-1.5 bg-purple-950/60 border border-purple-500/20 text-purple-300 px-3 py-1 rounded-full text-xs font-bold font-mono tracking-widest uppercase animate-bounce mt-2">
           <Flame className="h-4 w-4 text-purple-400 fill-purple-400/20" />
-          Acesso Aberto de Demonstração
+          Acesso Aberto de DemonstraÃ§Ã£o
         </div>
 
         <h1 className="font-heading text-3xl sm:text-5xl font-extrabold tracking-tight text-white max-w-3xl leading-tight sm:leading-none mt-2">
           O Ecossistema Definitivo para <br className="hidden sm:inline" />
           <span className="bg-gradient-to-r from-purple-400 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
-            Músicos e Produtores
+            MÃºsicos e Produtores
           </span>
         </h1>
 
         <p className="text-sm sm:text-base text-zinc-400 max-w-2xl leading-relaxed mt-2">
-          Aprenda violão, bateria, contrabaixo, gravação no Reaper, mixagem profissional e podcast. Conecte-se com alunos, compre VSTs e organize seus estudos com nossa IA.
+          Aprenda violÃ£o, bateria, contrabaixo, gravaÃ§Ã£o no Reaper, mixagem profissional e podcast. Conecte-se com alunos, compre VSTs e organize seus estudos com nossa IA.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4 mt-6 w-full sm:w-auto">
@@ -67,7 +67,7 @@ export const PublicHome: React.FC = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-8 border-t border-zinc-900/60 w-full text-zinc-500 text-xs">
           <div className="flex items-center justify-center gap-2">
             <Music className="h-4 w-4 text-purple-500" />
-            <span>Múltiplos Instrumentos</span>
+            <span>MÃºltiplos Instrumentos</span>
           </div>
           <div className="flex items-center justify-center gap-2">
             <Sparkles className="h-4 w-4 text-cyan-400" />
@@ -84,17 +84,17 @@ export const PublicHome: React.FC = () => {
         </div>
       </section>
 
-      {/* 2. GRADE DE VÍDEOS GRATUITOS (ESTILO YOUTUBE) */}
+      {/* 2. GRADE DE VÃDEOS GRATUITOS (ESTILO YOUTUBE) */}
       <section className="flex flex-col gap-6" id="free-lessons-section">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-900 pb-4">
           <div>
             <h2 className="font-heading text-lg sm:text-2xl font-bold text-white tracking-wide">
-              Conteúdos Gratuitos Disponíveis
+              ConteÃºdos Gratuitos DisponÃ­veis
             </h2>
-            <p className="text-xs text-zinc-500 mt-1">Aulas completas e gratuitas liberadas para degustação.</p>
+            <p className="text-xs text-zinc-500 mt-1">Aulas completas e gratuitas liberadas para degustaÃ§Ã£o.</p>
           </div>
           <div className="text-xs bg-cyan-950/30 border border-cyan-500/20 text-cyan-400 px-3 py-1 rounded-full font-semibold">
-            {freeLessons.length} Aulas Disponíveis
+            {freeLessons.length} Aulas DisponÃ­veis
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export const PublicHome: React.FC = () => {
             Cansado de estudar sozinho sem rumo na internet?
           </h3>
           <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-            No <span className="text-cyan-400 font-semibold">Netflix do Músico</span>, você tem um roteiro sequencial perfeito do Nível Zero ao Avançado. Compartilhe sua evolução, receba feedbacks de professores, faça reviews de equipamentos e interaja com outros músicos!
+            No <span className="text-cyan-400 font-semibold">{settings.platformName}</span>, vocÃª tem um roteiro sequencial perfeito do NÃ­vel Zero ao AvanÃ§ado. Compartilhe sua evoluÃ§Ã£o, receba feedbacks de professores, faÃ§a reviews de equipamentos e interaja com outros mÃºsicos!
           </p>
         </div>
         <button 
@@ -133,11 +133,11 @@ export const PublicHome: React.FC = () => {
         <div className="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-50 p-4 sm:p-6">
           <div className="w-full max-w-3xl glass-panel border border-zinc-800 rounded-2xl overflow-hidden relative shadow-2xl animate-scale-up">
             
-            {/* Cabeçalho do Modal */}
+            {/* CabeÃ§alho do Modal */}
             <div className="p-4 border-b border-zinc-900 flex items-center justify-between bg-zinc-950/60">
               <div>
                 <span className="text-[9px] bg-cyan-950 border border-cyan-500/20 text-cyan-400 px-2 py-0.5 rounded font-mono uppercase tracking-wider">
-                  Aula Gratuita • {activePreview.category}
+                  Aula Gratuita â€¢ {activePreview.category}
                 </span>
                 <h4 className="text-sm font-bold text-white mt-1 line-clamp-1">
                   {activePreview.title}
@@ -152,7 +152,7 @@ export const PublicHome: React.FC = () => {
               </button>
             </div>
 
-            {/* Vídeo / Iframe */}
+            {/* VÃ­deo / Iframe */}
             <div className="relative aspect-video bg-black">
               <iframe 
                 src={activePreview.videoUrl} 
@@ -162,16 +162,16 @@ export const PublicHome: React.FC = () => {
                 allow="autoplay; encrypted-media"
               />
               
-              {/* Marca d'água dinâmica do Convidado para simular segurança */}
+              {/* Marca d'Ã¡gua dinÃ¢mica do Convidado para simular seguranÃ§a */}
               <div className="absolute top-4 left-4 pointer-events-none select-none text-[8px] sm:text-[10px] font-mono bg-black/60 border border-white/5 text-white/20 px-2 py-0.5 rounded">
-                👤 CONVIDADO DEMONSTRAÇÃO | ID: GUEST-000 | NETFLIX DO MÚSICO
+                ðŸ‘¤ CONVIDADO DEMONSTRAÇÃO | ID: GUEST-000 | {settings.platformName}
               </div>
             </div>
 
-            {/* Rodapé Informativo / Conversão */}
+            {/* RodapÃ© Informativo / ConversÃ£o */}
             <div className="p-4 sm:p-5 border-t border-zinc-900 bg-zinc-950/80 flex flex-col sm:flex-row items-center justify-between gap-4">
               <p className="text-[11px] text-zinc-400 text-center sm:text-left leading-normal max-w-md">
-                Gostou desta aula? Inscreva-se agora para liberar mais de <span className="text-white font-bold">120 aulas premium</span> organizadas por níveis e temporadas!
+                Gostou desta aula? Inscreva-se agora para liberar mais de <span className="text-white font-bold">120 aulas premium</span> organizadas por nÃ­veis e temporadas!
               </p>
               <button 
                 onClick={() => {
@@ -193,3 +193,4 @@ export const PublicHome: React.FC = () => {
   );
 };
 export default PublicHome;
+
