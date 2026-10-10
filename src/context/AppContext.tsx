@@ -144,6 +144,7 @@ interface AppContextType {
   setPostModeration: (postId: string, status: CommunityPost['moderationStatus']) => void;
   saveStudent: (input: Partial<ManagedUser> & { id?: string }) => Promise<boolean>;
   toggleStudentStatus: (studentId: string) => void;
+  deleteStudentAccount: (studentId: string) => Promise<boolean>;
   saveSettings: (updated: Partial<PlatformSettings>) => Promise<boolean>;
 }
 
@@ -382,6 +383,13 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     });
   };
   const toggleStudentStatus=async(id:string)=>{const student=students.find(s=>s.id===id);if(student)await saveStudent({id,status:student.status==='active'?'inactive':'active'});};
+  const deleteStudentAccount=async(id:string):Promise<boolean>=>{
+    if(user?.role!=='admin'||!supabase||!students.some(s=>s.id===id&&s.role==='student'))return false;
+    return mutate(async()=>{
+      const {data,error}=await supabase!.functions.invoke('admin-delete-student',{body:{studentId:id}});
+      if(error||!data?.ok)throw new Error(data?.error||'Não foi possível excluir a conta.');
+    },'Conta excluída permanentemente.');
+  };
   const updateProfile=async(updated:Partial<StudentProfile>)=>{
     if(!user)return false;
     return mutate(async()=>{const {error}=await supabase!.rpc('ndm_update_profile',{changes:updated});if(error)throw error;});
@@ -468,7 +476,7 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
 
   return <AppContext.Provider value={{importLegacyContent,user,isSubscriber,authLoading,dataError,dataWarning,isSaving,isRecovery,refreshData,finishRecovery,registerUser,
     currentScreen,screenParams,historyStack,watchedHistory,completedLessons,favoriteLessons,favoriteEquipments,communityFeed,equipments,catalogLessons,courses,modules,lives,marketplaceItems,students,payments,settings,activities,toast,aiCalendar,searchQuery,setSearchQuery,navigateTo,goBack,loginUser,logoutUser,updateProfile,toggleLessonComplete,toggleLessonFavorite,toggleEquipmentFavorite,addToWatchedHistory,createNewPost,
-    likePost:(id)=>{void interact('post',id,'like');},addCommentToPost:(id,text)=>interact('post',id,'comment',{text}),addCommentToEquipment:(id,rating,text)=>interact('equipment',id,'review',{rating,text}),generateStudyCalendar,reportPost:(id)=>{void interact('post',id,'report');},showToast,clearToast:()=>setToast(null),publishedLessons,publishedCourses,saveCourse,deleteCourse:(id)=>{void deleteCourseCascade(id);},toggleCoursePublish,saveModule,deleteModule:(id)=>{void deleteModuleCascade(id);},moveModule:(id,d)=>{void reorder('module',id,d);},saveLesson,deleteLesson:(id)=>{void deleteRecord('lesson',id);},moveLesson:(id,d)=>{void reorder('lesson',id,d);},toggleLessonPublish,saveLive,deleteLive:(id)=>{void deleteRecord('live',id);},saveMarketplaceItem,deleteMarketplaceItem:(id)=>{void deleteRecord('marketplace',id);},saveEquipment,deleteEquipment:(id)=>{void deleteRecord('equipment',id);},deleteCommunityPost:(id)=>{void deleteRecord('post',id);},setPostModeration,saveStudent,toggleStudentStatus,saveSettings}}>{children}</AppContext.Provider>;
+    likePost:(id)=>{void interact('post',id,'like');},addCommentToPost:(id,text)=>interact('post',id,'comment',{text}),addCommentToEquipment:(id,rating,text)=>interact('equipment',id,'review',{rating,text}),generateStudyCalendar,reportPost:(id)=>{void interact('post',id,'report');},showToast,clearToast:()=>setToast(null),publishedLessons,publishedCourses,saveCourse,deleteCourse:(id)=>{void deleteCourseCascade(id);},toggleCoursePublish,saveModule,deleteModule:(id)=>{void deleteModuleCascade(id);},moveModule:(id,d)=>{void reorder('module',id,d);},saveLesson,deleteLesson:(id)=>{void deleteRecord('lesson',id);},moveLesson:(id,d)=>{void reorder('lesson',id,d);},toggleLessonPublish,saveLive,deleteLive:(id)=>{void deleteRecord('live',id);},saveMarketplaceItem,deleteMarketplaceItem:(id)=>{void deleteRecord('marketplace',id);},saveEquipment,deleteEquipment:(id)=>{void deleteRecord('equipment',id);},deleteCommunityPost:(id)=>{void deleteRecord('post',id);},setPostModeration,saveStudent,toggleStudentStatus,deleteStudentAccount,saveSettings}}>{children}</AppContext.Provider>;
 };
 export const useApp=()=>{const context=useContext(AppContext);if(!context)throw new Error('useApp deve ser usado com um AppProvider');return context;};
 
