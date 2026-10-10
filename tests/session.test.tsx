@@ -57,3 +57,22 @@ it('preserves the confirmed snapshot when a background data read fails',async()=
  await act(async()=>{await result.current.refreshData();});
  expect(result.current.user?.id).toBe('real-user');expect(result.current.settings.platformName).toBe(defaultSettings.platformName);expect(result.current.dataError).toBeNull();
 });
+it.each(['pending','overdue','cancelled'])('blocks student content when subscription is %s',async(status)=>{
+ fake.snapshot.user.subscriptionStatus=status;
+ const {result}=renderHook(useApp,{wrapper});await waitFor(()=>expect(result.current.authLoading).toBe(false));
+ expect(result.current.isSubscriber).toBe(false);
+ act(()=>result.current.navigateTo('CategoryPage'));
+ expect(result.current.currentScreen).toBe('MemberHome');
+});
+it('grants content access only to an active student with an active subscription',async()=>{
+ fake.snapshot.user.subscriptionStatus='active';
+ const {result}=renderHook(useApp,{wrapper});await waitFor(()=>expect(result.current.authLoading).toBe(false));
+ expect(result.current.isSubscriber).toBe(true);
+ act(()=>result.current.navigateTo('CategoryPage'));
+ expect(result.current.currentScreen).toBe('CategoryPage');
+});
+it('blocks subscribed students during maintenance',async()=>{
+ fake.snapshot.user.subscriptionStatus='active';fake.snapshot.settings.maintenanceMode=true;
+ const {result}=renderHook(useApp,{wrapper});await waitFor(()=>expect(result.current.authLoading).toBe(false));
+ expect(result.current.isSubscriber).toBe(false);
+});
