@@ -6,6 +6,7 @@ import { Star, X, MessageSquare, Play, Send, CheckCircle, Award } from 'lucide-r
 
 export const EquipmentReviews: React.FC = () => {
   const { equipments, addCommentToEquipment, screenParams, user } = useApp();
+  const publishedEquipments = equipments.filter((eq) => eq.published !== false);
 
   const [activeFilter, setActiveFilter] = useState<string>('Tudo');
   const [selectedEq, setSelectedEq] = useState<Equipment | null>(null);
@@ -28,14 +29,20 @@ export const EquipmentReviews: React.FC = () => {
 
   // Filtra equipamentos reativamente
   const filteredEquipments = activeFilter === 'Tudo' 
-    ? equipments 
-    : equipments.filter(eq => eq.type === activeFilter);
+    ? publishedEquipments 
+    : publishedEquipments.filter(eq => eq.type === activeFilter);
 
   // Monitora redirecionamento via busca rápida (com activeEqId nos params)
   useEffect(() => {
     if (screenParams?.activeEqId) {
-      const match = equipments.find(e => e.id === screenParams.activeEqId);
-      if (match) setSelectedEq(match);
+      const match = publishedEquipments.find(e => e.id === screenParams.activeEqId);
+      setSelectedEq(match || null);
+      return;
+    }
+
+    if (selectedEq) {
+      const updated = publishedEquipments.find(e => e.id === selectedEq.id);
+      setSelectedEq(updated || null);
     }
   }, [screenParams, equipments]);
 
@@ -45,18 +52,11 @@ export const EquipmentReviews: React.FC = () => {
     setCommentText('');
   };
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEq || commentText.trim() === '') return;
 
-    addCommentToEquipment(selectedEq.id, rating, commentText.trim());
-    
-    // Atualiza o modal reativo localmente com o novo comentário
-    const updated = equipments.find(e => e.id === selectedEq.id);
-    if (updated) {
-      setSelectedEq(updated);
-    }
-    
+    if (!await addCommentToEquipment(selectedEq.id, rating, commentText.trim())) return;
     setCommentText('');
   };
 

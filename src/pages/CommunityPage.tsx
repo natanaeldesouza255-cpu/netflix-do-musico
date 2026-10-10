@@ -5,16 +5,18 @@ import { Users, Send, Video, Sparkles, AlertCircle } from 'lucide-react';
 
 export const CommunityPage: React.FC = () => {
   const { communityFeed, createNewPost, user } = useApp();
+  const visibleCommunityFeed = communityFeed.filter((post) => post.moderationStatus !== 'hidden');
   
   const [postContent, setPostContent] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const [showVideoInput, setShowVideoInput] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (postContent.trim() === '') return;
 
-    createNewPost(postContent.trim(), videoUrl.trim() || undefined);
+    const saved = await createNewPost(postContent.trim(), videoUrl.trim() || undefined);
+    if (!saved) return;
     setPostContent('');
     setVideoUrl('');
     setShowVideoInput(false);
@@ -36,7 +38,7 @@ export const CommunityPage: React.FC = () => {
         {user && (
           <div className="text-xs bg-purple-950/30 border border-purple-500/25 text-purple-300 px-3.5 py-1 rounded-full font-mono flex items-center gap-1.5 self-start sm:self-auto">
             <Sparkles className="h-3.5 w-3.5 fill-purple-400/20 text-purple-400" />
-            <span>Postar Evolução ganha +50 XP!</span>
+            <span>Compartilhe sua evolução</span>
           </div>
         )}
       </div>
@@ -124,8 +126,8 @@ export const CommunityPage: React.FC = () => {
 
       {/* FEED DE POSTAGENS */}
       <div className="flex flex-col gap-5">
-        {communityFeed.length > 0 ? (
-          communityFeed.map(post => (
+        {visibleCommunityFeed.length > 0 ? (
+          visibleCommunityFeed.map(post => (
             <CommunityPost 
               key={post.id} 
               post={post} 

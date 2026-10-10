@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { livesData, LiveSession } from '../data/mockData';
+import { LiveSession } from '../data/mockData';
 import { Watermark } from '../components/Watermark';
 import { 
   Radio, 
@@ -23,10 +23,10 @@ interface ChatMessage {
 }
 
 export const LivePage: React.FC = () => {
-  const { user } = useApp();
+  const { user, lives } = useApp();
   const [activeLive, setActiveLive] = useState<LiveSession | null>(
     // Pega o primeiro replay por padrão para simular a visualização de vídeo de live
-    livesData.find(l => l.status === 'replay') || null
+    lives.find(l => l.status === 'replay' || l.status === 'finished') || null
   );
 
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -38,8 +38,19 @@ export const LivePage: React.FC = () => {
   const [myMessage, setMyMessage] = useState('');
   
   // Agenda e Replays
-  const scheduledLives = livesData.filter(l => l.status === 'scheduled');
-  const replayLives = livesData.filter(l => l.status === 'replay');
+  const scheduledLives = lives.filter(l => l.status === 'scheduled' || l.status === 'live');
+  const replayLives = lives.filter(l => l.status === 'replay' || l.status === 'finished');
+
+  // Mantém o player sincronizado com alterações feitas pelo Admin.
+  useEffect(() => {
+    if (!activeLive) return;
+    const updatedLive = lives.find(l => l.id === activeLive.id);
+    if (!updatedLive || !['replay','finished','live'].includes(updatedLive.status)) {
+      setActiveLive(replayLives[0] || null);
+      return;
+    }
+    if (updatedLive !== activeLive) setActiveLive(updatedLive);
+  }, [lives, activeLive, replayLives]);
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -101,10 +112,10 @@ export const LivePage: React.FC = () => {
   };
 
   const handleSelectLive = (live: LiveSession) => {
-    if (live.status === 'replay') {
+    if (live.status === 'replay' || live.status === 'finished' || live.status === 'live') {
       setActiveLive(live);
     } else {
-      alert(`Esta live está agendada para ${live.date} às ${live.time}. Um link de acesso VIP privado será enviado por e-mail para você 15 minutos antes do início!`);
+      alert(`Esta live está agendada para ${live.date} às ${live.time}. Volte aqui no horário marcado para acessar.`);
     }
   };
 
@@ -132,7 +143,9 @@ export const LivePage: React.FC = () => {
           <div className="lg:col-span-2 flex flex-col gap-4">
             
             <div className="relative aspect-video bg-black rounded-2xl overflow-hidden border border-zinc-800 shadow-2xl">
-              {activeLive.videoUrl ? (
+              {activeLive.status === 'live' && activeLive.link ? (
+                <a className="text-cyan-400 underline p-8" href={/^https:\/\//i.test(activeLive.link) ? activeLive.link : undefined} target="_blank" rel="noopener noreferrer">Entrar na transmissão ao vivo</a>
+              ) : activeLive.videoUrl ? (
                 <iframe 
                   src={`${activeLive.videoUrl}?autoplay=1&modestbranding=1&controls=0`} 
                   title={activeLive.title}

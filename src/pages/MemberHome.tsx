@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { isFeatureEnabled } from '../lib/platform';
 import { CourseCard } from '../components/CourseCard';
 import { MusicCategory } from '../data/mockData';
 import { Play, Info, Flame, History, Award, BookOpen, Clock, Heart } from 'lucide-react';
 
 export const MemberHome: React.FC = () => {
-  const { navigateTo, watchedHistory, publishedLessons, publishedCourses } = useApp();
+  const { navigateTo, watchedHistory, publishedLessons, publishedCourses, settings } = useApp();
   const [showHeroDetails, setShowHeroDetails] = useState(false);
 
   // 1. DADOS DAS CATEGORIAS PREMIUM
@@ -95,7 +96,8 @@ export const MemberHome: React.FC = () => {
 
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => handleLessonHistoryClick(heroLesson)}
+              disabled={!heroLesson}
+              onClick={() => heroLesson && handleLessonHistoryClick(heroLesson)}
               className="bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs px-5 py-3 rounded-lg flex items-center justify-center gap-1.5 transition-all shadow-lg hover:shadow-purple-500/10 focus:outline-none"
               id="btn-hero-play"
             >
@@ -113,7 +115,7 @@ export const MemberHome: React.FC = () => {
           </div>
 
           {/* Gaveta de detalhes extras */}
-          {showHeroDetails && (
+          {showHeroDetails && heroLesson && (
             <div className="mt-3 p-4 rounded-xl glass-panel border border-zinc-800 max-w-lg animate-slide-down">
               <div className="flex items-center gap-2 text-[10px] text-zinc-400 font-mono">
                 <span>Duração: {heroLesson.duration}</span>
@@ -198,7 +200,7 @@ export const MemberHome: React.FC = () => {
 
           <div className="flex flex-col gap-6">
             <div className="flex gap-4 overflow-x-auto no-scrollbar pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
-              {(publishedCourses.length > 0 ? publishedCourses.map((course) => (
+              {publishedCourses.map((course) => (
                   <CourseCard
                     key={course.id}
                     categoryName={course.title}
@@ -207,19 +209,8 @@ export const MemberHome: React.FC = () => {
                     description={course.description}
                     onClick={() => handleCategoryClick(course.category, course.id)}
                   />
-                )) : categoriesList.map((cat) => {
-                const count = publishedLessons.filter(l => l.category === cat.name).length;
-                return (
-                  <CourseCard
-                    key={cat.name}
-                    categoryName={cat.name}
-                    imageUrl={cat.img}
-                    lessonCount={count}
-                    description={cat.desc}
-                    onClick={() => handleCategoryClick(cat.name)}
-                  />
-                );
-              }))}
+                ))}
+              {publishedCourses.length === 0 && <p>Nenhum curso publicado no momento.</p>}
             </div>
           </div>
         </section>
@@ -262,6 +253,7 @@ export const MemberHome: React.FC = () => {
               </p>
             </div>
             <button 
+              disabled={!isFeatureEnabled(settings,'community')}
               onClick={() => navigateTo('CommunityPage')}
               className="w-fit bg-zinc-850 hover:bg-purple-600 hover:text-white border border-zinc-700 hover:border-transparent font-bold text-xs px-4 py-2 rounded-lg transition"
               id="btn-goto-community"
