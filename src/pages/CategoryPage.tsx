@@ -4,6 +4,7 @@ import { Lesson, MusicCategory, MusicLevel } from '../data/mockData';
 import { EpisodeCard } from '../components/EpisodeCard';
 import { Watermark } from '../components/Watermark';
 import { safeEmbedUrl } from '../lib/video';
+import { getLessonVideoUrl, isStoredLessonVideo } from '../lib/lessonVideos';
 import { 
   Play, 
   ChevronLeft, 
@@ -35,6 +36,8 @@ export const CategoryPage: React.FC = () => {
   const activeCategory: MusicCategory = screenParams?.category || 'Violão';
   const categoryLessons = publishedLessons.filter(l => screenParams?.courseId ? l.courseId === screenParams.courseId : l.category === activeCategory);
   const levelsOrder: MusicLevel[] = ['Nível Zero', 'Aprendiz', 'Mediano', 'Profissional', 'Avançado'];
+  const [signedVideo, setSignedVideo] = useState<string | null>(null);
+  const [videoLoadError, setVideoLoadError] = useState('');
   const [chosenLevel, setChosenLevel] = useState<MusicLevel | null>(null);
   const [chosenLessonId, setChosenLessonId] = useState<string | null>(null);
   useEffect(() => {setChosenLessonId(null);setChosenLevel(null);}, [screenParams]);
@@ -45,11 +48,21 @@ export const CategoryPage: React.FC = () => {
   useEffect(() => {if(activeLesson) addToWatchedHistory(activeLesson.id);}, [activeLesson?.id]);
   const handleLessonSelect = (lesson: Lesson) => {setChosenLessonId(lesson.id);setChosenLevel(lesson.level);};
   const handleLevelChange = (level: MusicLevel) => {setChosenLevel(level);setChosenLessonId(null);};
+  useEffect(() => {
+    let alive = true;
+    setSignedVideo(null);setVideoLoadError('');
+    if (isStoredLessonVideo(activeLesson?.videoUrl)) {
+      getLessonVideoUrl(activeLesson?.videoUrl || '').then(url => {if(alive)setSignedVideo(url);})
+        .catch(() => {if(alive)setVideoLoadError('Não foi possível liberar este vídeo. Verifique sua assinatura e tente novamente.');});
+    }
+    return () => {alive=false;};
+  }, [activeLesson?.id, activeLesson?.videoUrl]);
   if (!activeLesson) return <div className="p-8 text-center"><p>Nenhuma aula publicada neste curso.</p><button onClick={goBack} className="mt-4 text-purple-400">Voltar</button></div>;
 
   const isFavorited = favoriteLessons.includes(activeLesson.id);
   const isCompleted = completedLessons.includes(activeLesson.id);
   const embedUrl = safeEmbedUrl(activeLesson.videoUrl);
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 flex flex-col gap-6" id="category-page-root">
@@ -83,7 +96,9 @@ export const CategoryPage: React.FC = () => {
             id="premium-video-player-container"
           >
             
-            {embedUrl ? (
+            {isStoredLessonVideo(activeLesson.videoUrl) ? (
+              signedVideo ? <video key={activeLesson.id} src={signedVideo} controls playsInline preload="metadata" className="w-full h-full bg-black" /> : <div role="status" className="w-full h-full flex items-center justify-center p-6 text-center text-zinc-300">{videoLoadError || "Carregando vídeo protegido..."}</div>
+            ) : embedUrl ? (
               <iframe
                 key={activeLesson.id}
                 src={embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'controls=1&autoplay=0'}

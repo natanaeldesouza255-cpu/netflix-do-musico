@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useApp } from '../../context/AppContext';
+import { uploadLessonVideo, MAX_VIDEO_BYTES, isStoredLessonVideo } from '../../lib/lessonVideos';
 import { CourseModule, Lesson } from '../../data/mockData';
 import { AdminModal, Field, inputClass } from '../../components/admin/AdminModal';
 import { ConfirmDialog } from '../../components/ConfirmDialog';
@@ -29,6 +30,8 @@ export const AdminCourseEditor: React.FC = () => {
 
   const [moduleForm, setModuleForm] = useState<Partial<CourseModule> & { name: string; courseId: string } | null>(null);
   const [lessonForm, setLessonForm] = useState<(Partial<Lesson> & { title: string; courseId: string; moduleId: string }) | null>(null);
+  const [videoUploading, setVideoUploading] = useState(false);
+  const [videoError, setVideoError] = useState('');
   const [deleteMod, setDeleteMod] = useState<CourseModule | null>(null);
   const [deleteLes, setDeleteLes] = useState<Lesson | null>(null);
 
@@ -82,7 +85,7 @@ export const AdminCourseEditor: React.FC = () => {
                   onClick={() => setLessonForm({
                     title: '',
                     description: '',
-                    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+                    videoUrl: '',
                     duration: '10 min',
                     complementaryUrl: '',
                     status: 'published',
@@ -151,12 +154,31 @@ export const AdminCourseEditor: React.FC = () => {
             className="flex flex-col gap-3"
             onSubmit={async (e) => {
               e.preventDefault();
+              if (videoUploading) return;
               if (await saveLesson(lessonForm)) setLessonForm(null);
             }}
           >
             <Field label="Título"><input className={inputClass} value={lessonForm.title} onChange={(e) => setLessonForm({ ...lessonForm, title: e.target.value })} required /></Field>
             <Field label="Descrição"><textarea className={inputClass} rows={3} value={lessonForm.description || ''} onChange={(e) => setLessonForm({ ...lessonForm, description: e.target.value })} /></Field>
-            <Field label="URL do vídeo (embed)"><input className={inputClass} value={lessonForm.videoUrl || ''} onChange={(e) => setLessonForm({ ...lessonForm, videoUrl: e.target.value })} /></Field>
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-zinc-300">Vídeo da aula — escolha uma opção</label>
+              <label className="text-xs text-zinc-400">Opção 1: link de incorporação do YouTube ou Vimeo</label>
+              <input className={inputClass} placeholder="https://www.youtube.com/embed/..." value={isStoredLessonVideo(lessonForm.videoUrl) ? '' : (lessonForm.videoUrl || '')} onChange={(e) => {setVideoError('');setLessonForm({...lessonForm,videoUrl:e.target.value});}} disabled={videoUploading} />
+              <label className="text-xs text-zinc-400">Opção 2: enviar MP4 privado (até 45 MB por vídeo nesta fase)</label>
+              <input type="file" accept=".mp4,video/mp4" className="text-xs text-zinc-300" disabled={videoUploading} onChange={async(e)=>{
+                const file=e.target.files?.[0]; if(!file)return;
+                setVideoError('');
+                if(file.size>MAX_VIDEO_BYTES){setVideoError('Arquivo acima de 45 MB. Use o link ou comprima o vídeo.');return;}
+                setVideoUploading(true);
+                try{const url=await uploadLessonVideo(file);setLessonForm(prev=>prev?{...prev,videoUrl:url}:prev);}
+                catch(err){setVideoError(err instanceof Error?err.message:'Erro no envio do vídeo.');}
+                finally{setVideoUploading(false);e.target.value='';}
+              }}/>
+              {videoUploading && <p role="status" className="text-xs text-cyan-400">Enviando vídeo... Não feche esta janela.</p>}
+              {isStoredLessonVideo(lessonForm.videoUrl) && <p className="text-xs text-emerald-400">MP4 enviado ao armazenamento privado. Salve a aula para vincular o vídeo.</p>}
+              {videoError && <p role="alert" className="text-xs text-red-400">{videoError}</p>}
+              <p className="text-[11px] text-zinc-500">Para vídeos maiores, use um link. O envio direto depende do bucket privado configurado no Supabase.</p>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Duração"><input className={inputClass} value={lessonForm.duration || ''} onChange={(e) => setLessonForm({ ...lessonForm, duration: e.target.value })} /></Field>
               <Field label="Status">
@@ -172,7 +194,7 @@ export const AdminCourseEditor: React.FC = () => {
               <input type="checkbox" checked={!!lessonForm.isFree} onChange={(e) => setLessonForm({ ...lessonForm, isFree: e.target.checked })} />
               Aula gratuita / preview
             </label>
-            <button className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-bold py-2.5 rounded-lg">Salvar</button>
+            <button disabled={videoUploading} className="bg-gradient-to-r from-purple-600 to-cyan-500 text-white text-xs font-bold py-2.5 rounded-lg disabled:opacity-50">Salvar</button>
           </form>
         )}
       </AdminModal>
