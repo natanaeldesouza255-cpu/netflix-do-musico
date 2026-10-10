@@ -10,12 +10,12 @@ it('renders an empty state when no published lesson exists', () => {
   expect(screen.getByText(/Nenhuma aula publicada/)).toBeTruthy();
 });
 it('does not mix published lessons from courses in the same category',()=>{
- state.publishedLessons=[{id:'a',courseId:'one',title:'Course one',level:'Nível Zero',category:'Violão',videoUrl:'https://example.org/a'}, {id:'b',courseId:'two',title:'Course two',level:'Nível Zero',category:'Violão',videoUrl:'https://example.org/b'}];
+ state.publishedLessons=[{id:'a',courseId:'one',title:'Course one',level:'Nível Zero',category:'Violão',videoUrl:'https://www.youtube.com/embed/abc123'}, {id:'b',courseId:'two',title:'Course two',level:'Nível Zero',category:'Violão',videoUrl:'https://www.youtube.com/embed/def456'}];
  render(<CategoryPage/>);
  expect(screen.queryByText('Course two')).toBeNull();expect(screen.getByTitle('Course one')).toBeTruthy();
 });
 it('removes the playing lesson as soon as it is unpublished',()=>{
- state.publishedLessons=[{id:'a',courseId:'one',title:'Removed lesson',level:'Nível Zero',category:'Violão',videoUrl:'https://example.org/a'}];
+ state.publishedLessons=[{id:'a',courseId:'one',title:'Removed lesson',level:'Nível Zero',category:'Violão',videoUrl:'https://www.youtube.com/embed/abc123'}];
  const view=render(<CategoryPage/>);state.publishedLessons=[];view.rerender(<CategoryPage/>);
  expect(screen.queryByTitle('Removed lesson')).toBeNull();expect(screen.getByText(/Nenhuma aula publicada/)).toBeTruthy();
 });

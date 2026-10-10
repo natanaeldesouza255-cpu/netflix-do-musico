@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Lesson, MusicCategory, MusicLevel } from '../data/mockData';
 import { EpisodeCard } from '../components/EpisodeCard';
 import { Watermark } from '../components/Watermark';
+import { safeEmbedUrl } from '../lib/video';
 import { 
   Play, 
   ChevronLeft, 
@@ -48,6 +49,7 @@ export const CategoryPage: React.FC = () => {
 
   const isFavorited = favoriteLessons.includes(activeLesson.id);
   const isCompleted = completedLessons.includes(activeLesson.id);
+  const embedUrl = safeEmbedUrl(activeLesson.videoUrl);
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 flex flex-col gap-6" id="category-page-root">
@@ -81,34 +83,22 @@ export const CategoryPage: React.FC = () => {
             id="premium-video-player-container"
           >
             
-            {/* Player de Iframe real mockado com Embed de YouTube */}
-            <iframe 
-              src={`${activeLesson.videoUrl}?autoplay=1&modestbranding=1&controls=0&rel=0`} 
-              title={activeLesson.title}
-              className="w-full h-full object-cover"
-              allow="autoplay; encrypted-media; gyroscope"
-              allowFullScreen
-            />
-
-            {/* MARCA D'ÁGUA DINÂMICA INTEGRADA (PROTEÇÃO ANTICLONE) */}
+            {embedUrl ? (
+              <iframe
+                key={activeLesson.id}
+                src={embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'controls=1&autoplay=0'}
+                title={activeLesson.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-6 text-center text-zinc-300">
+                Vídeo indisponível. Configure um link de incorporação do YouTube ou Vimeo no Admin.
+              </div>
+            )}
             <Watermark />
-
-            {/* Simulação de Controles Customizados Premium Sobrepostos */}
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/40 to-transparent p-3 sm:p-4 flex items-center justify-between gap-4 pointer-events-none opacity-80 sm:opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
-                  <Play className="h-3.5 w-3.5 fill-white text-white ml-0.5" />
-                </div>
-                <div className="text-[10px] text-zinc-300 font-mono">
-                  0:00 / {activeLesson.duration}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Volume2 className="h-4.5 w-4.5 text-zinc-300" />
-                <Settings className="h-4.5 w-4.5 text-zinc-300" />
-                <Maximize2 className="h-4.5 w-4.5 text-zinc-300" />
-              </div>
-            </div>
 
             {/* Alerta de Link Protegido */}
             <div className="absolute top-3 left-3 bg-black/70 border border-red-500/20 text-red-400 text-[8px] sm:text-[9px] font-mono px-2 py-0.5 rounded flex items-center gap-1 pointer-events-none">
