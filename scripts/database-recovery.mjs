@@ -11,7 +11,7 @@ const insideProject = (path) => {
 function run(binary, args, connection) {
   const result = spawnSync(binary, args, {
     stdio: 'inherit', shell: false,
-    env: { ...process.env, PGDATABASE: connection },
+    env: { ...process.env },
   });
   if (result.error) throw new Error(binary + ' nao encontrado. Instale PostgreSQL client tools 17 ou superior.');
   if (result.status !== 0) throw new Error(binary + ' falhou (codigo ' + result.status + ').');
@@ -24,7 +24,7 @@ if (action === 'backup') {
   mkdirSync(folder, { recursive: true });
   const name = 'ndm-' + new Date().toISOString().replace(/[:.]/g, '-') + '.dump';
   const output = join(folder, name);
-  run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', '--file', output], source);
+  run('pg_dump', ['--format=custom', '--no-owner', '--no-acl', '--file', output, '--dbname', source], undefined);
   if (statSync(output).size < 100) throw new Error('Backup muito pequeno: verificar arquivo.');
   if (process.platform !== 'win32') chmodSync(output, 0o600);
   run('pg_restore', ['--list', output], source);
@@ -44,7 +44,7 @@ if (action === 'backup') {
   if (target === source) throw new Error('Origem e destino iguais. Restauracao bloqueada.');
   if (flag !== '--confirm-restore') throw new Error('Restauracao bloqueada. Use --confirm-restore apenas em banco vazio de testes.');
   console.log('Restaurando em ambiente de testes. Nao use um banco com dados importantes.');
-  run('pg_restore', ['--no-owner', '--no-acl', '--exit-on-error', file], target);
+  run('pg_restore', ['--no-owner', '--no-acl', '--exit-on-error', '--dbname', target, file], undefined);
   console.log('Comando concluido. Valide tabelas, contagens, RLS, usuarios e Storage antes de declarar recuperacao.');
 } else {
   console.log('Uso: node scripts/database-recovery.mjs backup [PASTA_FORA_DO_REPO]');
