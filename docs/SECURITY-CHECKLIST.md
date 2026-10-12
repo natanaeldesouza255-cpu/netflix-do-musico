@@ -53,3 +53,10 @@
 - Codigo da Edge Function com verificacao de limite salvo e testado no GitHub (commit a31ae0b).
 - BLOQUEADO: Supabase deploy_edge_function retornou erro interno em duas tentativas; versao remota continua v3 sem rate limit. Nao considerar ativado ate publicar v4 e validar 429.
 - Pendente: regras anti-bot e rate limits para Auth e demais APIs; backup/restauracao e revisao WAF apos dominio proprio.
+
+## Backup e recuperacao - 2026-10-12
+- Procedimento criado: docs/BACKUP-RECOVERY.md.
+- Script scripts/database-recovery.mjs criado, sintaxe validada; exige conexoes via variaveis de ambiente, impede pasta dentro do repositorio, e exige confirmacao explicita para restauracao.
+- Nao concluido: pg_dump e pg_restore nao estao instalados no computador; nao foi gerado backup real, nem testada restauracao; disponibilidade de backups gerenciados do Supabase ainda nao confirmada.
+- Storage MP4 precisa de copia independente: dump PostgreSQL nao contem bytes dos videos.
+- Proxima validacao: obter ferramentas PostgreSQL, executar backup real criptografado, ensaiar restauracao em banco isolado e comparar dados.
