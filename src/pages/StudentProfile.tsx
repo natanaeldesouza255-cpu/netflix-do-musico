@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { safeEmbedUrl } from '../lib/video';
 
 import { AICalendar } from '../components/AICalendar';
 import { VideoCard } from '../components/VideoCard';
@@ -319,9 +320,9 @@ export const StudentProfile: React.FC = () => {
                       <p className="text-xs text-zinc-450 leading-relaxed">
                         {post.content}
                       </p>
-                      {post.videoUrl && (
+                      {safeEmbedUrl(post.videoUrl) && (
                         <div className="aspect-video bg-black rounded-lg overflow-hidden border border-zinc-900 max-w-sm relative">
-                          <iframe src={post.videoUrl} title="Evolução" className="w-full h-full" />
+                          <iframe src={safeEmbedUrl(post.videoUrl)!} sandbox="allow-scripts allow-same-origin allow-presentation" referrerPolicy="strict-origin-when-cross-origin" title="Evolução" className="w-full h-full" />
                         </div>
                       )}
                     </div>

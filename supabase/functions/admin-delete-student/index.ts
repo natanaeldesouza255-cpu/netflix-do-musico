@@ -25,8 +25,15 @@ Deno.serve(async (req: Request) => {
   const admin = createClient(url, service, { auth: { persistSession: false } });
   const { data: actor, error: actorError } = await admin.from('ndm_profiles').select('role,status').eq('id', user.id).single();
   if (actorError || actor?.role !== 'admin' || actor.status !== 'active') return fail(403, 'Apenas administradores ativos podem excluir alunos.');
+  // Reject oversized bodies before parsing. The endpoint accepts only a small UUID payload.
+  if (Number(req.headers.get('content-length') ?? 0) > 1024) return fail(413, 'Solicitação muito grande.');
   let body: { studentId?: string };
-  try { body = await req.json(); } catch { return fail(400, 'Solicitação inválida.'); }
+  try {
+    const raw = await req.text();
+    if (raw.length > 1024) return fail(413, 'Solicitação muito grande.');
+    body = JSON.parse(raw);
+    if (!body || typeof body !== 'object' || Array.isArray(body) || typeof body.studentId !== 'string') return fail(400, 'Solicitação inválida.');
+  } catch { return fail(400, 'Solicitação inválida.'); }
   const id = body.studentId;
   if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) || id === user.id) return fail(400, 'Aluno inválido.');
   const { data: target, error: targetError } = await admin.from('ndm_profiles').select('role').eq('id', id).single();
