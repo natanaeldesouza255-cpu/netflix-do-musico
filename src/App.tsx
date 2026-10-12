@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { AppProvider, useApp, isAdminScreen } from './context/AppContext';
 import { Navbar } from './components/Navbar';
 import { ToastHost } from './components/ToastHost';
+import { AdminMfaGate } from './components/AdminMfaGate';
 import { PublicHome } from './pages/PublicHome';
 import { LoginPage } from './pages/LoginPage';
 import { MemberHome } from './pages/MemberHome';
@@ -71,6 +72,7 @@ const MainLayout: React.FC = () => {
   if (user?.role === 'admin' && isAdminScreen(currentScreen) && !adminPreview) {
     return (
       <>
+        <AdminMfaGate>
         <AdminLayout
           onPreviewStudent={() => {
             navigateTo('MemberHome');
@@ -80,6 +82,7 @@ const MainLayout: React.FC = () => {
           <fieldset disabled={isSaving} className="min-w-0">{renderAdminScreen()}</fieldset>
           {isSaving && <p role="status">Salvando alterações…</p>}
         </AdminLayout>
+        </AdminMfaGate>
         <ToastHost />
       </>
     );

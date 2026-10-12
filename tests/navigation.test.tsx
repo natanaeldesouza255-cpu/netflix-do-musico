@@ -7,6 +7,7 @@ vi.mock('../src/pages/MemberHome',()=>({MemberHome:()=> <div>Student home</div>}
 vi.mock('../src/pages/LoginPage',()=>({LoginPage:()=> <div>Recovery or login</div>}));
 vi.mock('../src/pages/admin/AdminDashboard',()=>({AdminDashboard:()=> <div>Admin dashboard</div>}));
 vi.mock('../src/components/Navbar',()=>({Navbar:()=> <div>Navigation</div>}));
+vi.mock('../src/components/AdminMfaGate',()=>({AdminMfaGate:({children}:any)=>children}));
 import {App} from '../src/App';
 import {defaultSettings} from '../src/data/seedPlatform';
 beforeEach(()=>{context.value={user:{id:'admin',role:'admin'},currentScreen:'MemberHome',isSubscriber:false,authLoading:false,dataError:null,isSaving:false,isRecovery:false,settings:defaultSettings,navigateTo:vi.fn(),toast:null,logoutUser:vi.fn()};});
