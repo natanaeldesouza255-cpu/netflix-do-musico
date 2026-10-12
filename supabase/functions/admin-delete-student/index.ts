@@ -34,6 +34,9 @@ Deno.serve(async (req: Request) => {
     body = JSON.parse(raw);
     if (!body || typeof body !== 'object' || Array.isArray(body) || typeof body.studentId !== 'string') return fail(400, 'Solicitação inválida.');
   } catch { return fail(400, 'Solicitação inválida.'); }
+  const { data: allowed, error: rateError } = await admin.rpc('ndm_check_admin_rate_limit', { p_actor: user.id, p_operation: 'delete_student' });
+  if (rateError) { console.error('rate-limit check failed', rateError.message); return fail(503, 'Proteção temporariamente indisponível. Tente mais tarde.'); }
+  if (allowed !== true) return fail(429, 'Muitas tentativas de exclusão. Aguarde 15 minutos.');
   const id = body.studentId;
   if (!id || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id) || id === user.id) return fail(400, 'Aluno inválido.');
   const { data: target, error: targetError } = await admin.from('ndm_profiles').select('role').eq('id', id).single();
