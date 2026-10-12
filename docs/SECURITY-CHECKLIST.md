@@ -46,3 +46,10 @@
 - Testar backup e restauracao, sem tocar nos dados de producao sem planejamento.
 - Testar videos longos e seek apos expiracao de URL assinada.
 - Nao fazer merge do PR #3 sem autorizacao expressa.
+
+## Firewall e limites - 2026-10-12
+- Cloudflare nao possui zona de dominio proprio nesta conta; WAF por zona nao pode ser aplicado diretamente ao pages.dev.
+- Limite atomico no banco criado: ate 5 tentativas de exclusao por administrador a cada 15 minutos; acesso RPC somente service_role.
+- Codigo da Edge Function com verificacao de limite salvo e testado no GitHub (commit a31ae0b).
+- BLOQUEADO: Supabase deploy_edge_function retornou erro interno em duas tentativas; versao remota continua v3 sem rate limit. Nao considerar ativado ate publicar v4 e validar 429.
+- Pendente: regras anti-bot e rate limits para Auth e demais APIs; backup/restauracao e revisao WAF apos dominio proprio.
