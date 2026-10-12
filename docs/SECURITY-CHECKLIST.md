@@ -23,3 +23,26 @@
 - Pendente: conferir status da assinatura e publicacao do curso, testar abertura da aula e reproducao de video com assinatura pendente/inativa.
 - Pendente: teste de acesso indevido via API entre duas contas distintas e conta anonima.
 - Design aluno (prioridade apos seguranca): revisar logotipo quebrado, tipografia, nomes/textos estranhos, menu superior apertado, hero muito grande, alinhamento e responsividade mobile.
+
+## Atualizacao de seguranca - 2026-10-12
+
+### Concluido e verificado
+- Cloudflare Pages conectada ao GitHub; publicacoes automaticas de producao e preview desativadas.
+- Edge Function admin-delete-student v3 ativa no Supabase, JWT obrigatorio, MFA AAL2 e corpo limitado a 1 KB.
+- Cabecalhos de seguranca adicionados em public/_headers; ainda nao implantados na Cloudflare.
+- Links assinados dos videos privados reduzidos de 3600 para 900 segundos; ainda nao implantados na Cloudflare.
+- npm audit de dependencias de producao: zero vulnerabilidades reportadas no momento da verificacao.
+- Build e 39 testes automatizados aprovados.
+- Auditoria do banco de dados registra mudancas sensiveis em perfis; falta testar gatilho e sincronizar migracao local.
+
+### Bloqueadores antes de disponibilizar alunos
+- Uma implantacao de producao permanece ativa na Cloudflare; API recusou exclui-la enquanto ativa. Nao considerar site privado.
+- Zero Trust gratuito requer metodo de pagamento na conta; nao ativado.
+- Publicar pagina de manutencao ou implantar outra restricao antes de testes publicos.
+- Configurar variaveis publicas VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY com cuidado; nunca service_role no frontend.
+- Configurar limitacao de taxa em endpoints Supabase e protecao contra abuso.
+- Revisar SSRF/RCE nas funcoes futuras e validar dependencias em CI.
+- Revisar firewall, colaboradores, tokens e acessos remotos.
+- Testar backup e restauracao, sem tocar nos dados de producao sem planejamento.
+- Testar videos longos e seek apos expiracao de URL assinada.
+- Nao fazer merge do PR #3 sem autorizacao expressa.
