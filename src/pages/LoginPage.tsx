@@ -13,7 +13,7 @@ export const LoginPage: React.FC = () => {
     try{
       if(!supabase)throw new Error('A plataforma ainda não foi configurada.');
       if(isRecovery){
-        if(password.length<8||password!==confirm)throw new Error('Use pelo menos 8 caracteres e confirme a mesma senha.');
+        if(password.length<12||password!==confirm)throw new Error('Use pelo menos 12 caracteres e confirme a mesma senha.');
         const {error}=await supabase.auth.updateUser({password});if(error)throw new Error('Link inválido ou expirado. Solicite um novo link.');
         setDone(true);window.history.replaceState({},document.title,window.location.pathname);
       }else if(mode==='forgot'){
@@ -22,7 +22,7 @@ export const LoginPage: React.FC = () => {
         setMessage('Se houver uma conta com esse e-mail, você receberá o link de recuperação.');
       }else if(mode==='register'){
         if(!settings.allowRegistrations)throw new Error('Novos cadastros estão desativados.');
-        if(!name.trim()||password.length<8)throw new Error('Informe seu nome e uma senha com pelo menos 8 caracteres.');
+        if(!name.trim()||password.length<12)throw new Error('Informe seu nome e uma senha com pelo menos 12 caracteres.');
         if(!await registerUser(email,password,name,instrument))throw new Error('Não foi possível cadastrar. Confira os dados e tente novamente.');
         setMessage('Confira seu e-mail para confirmar o cadastro. A assinatura precisa ser ativada pelo administrador.');
       }else if(!await loginUser(email,password))throw new Error('Não foi possível entrar. Confira os dados e tente novamente.');
