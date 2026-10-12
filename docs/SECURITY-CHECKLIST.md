@@ -17,3 +17,9 @@
 - Test private video signed URL expiration and access revocation; short-lived URLs are bearer links, not DRM.
 - Configure rate limiting, bot protections, monitoring and tested database backups.
 - Define retention, privacy notice, access requests and incident response under LGPD.
+
+## Registro de teste e revisao visual - 2026-10-12
+- Conta de aluno entrou pela janela anonima e visualizou a home; isso nao comprova acesso a conteudo premium.
+- Pendente: conferir status da assinatura e publicacao do curso, testar abertura da aula e reproducao de video com assinatura pendente/inativa.
+- Pendente: teste de acesso indevido via API entre duas contas distintas e conta anonima.
+- Design aluno (prioridade apos seguranca): revisar logotipo quebrado, tipografia, nomes/textos estranhos, menu superior apertado, hero muito grande, alinhamento e responsividade mobile.
