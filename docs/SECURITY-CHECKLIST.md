@@ -57,6 +57,9 @@
 ## Backup e recuperacao - 2026-10-12
 - Procedimento criado: docs/BACKUP-RECOVERY.md.
 - Script scripts/database-recovery.mjs criado, sintaxe validada; exige conexoes via variaveis de ambiente, impede pasta dentro do repositorio, e exige confirmacao explicita para restauracao.
-- Nao concluido: pg_dump e pg_restore nao estao instalados no computador; nao foi gerado backup real, nem testada restauracao; disponibilidade de backups gerenciados do Supabase ainda nao confirmada.
+- Backup real gerado em 2026-10-12: C:\Users\User\ndm-backups\ndm-2026-10-12T21-13-07-759Z.dump (334255 bytes; formato custom, 502 entradas de catalogo verificadas). Nao versionar nem compartilhar este arquivo.
+- Teste de restauracao isolado executado em PostgreSQL 17 local (127.0.0.1:55439), sem alterar producao. Tabelas da aplicacao recuperadas e consultadas: courses=2, profiles=1. Servidor local desligado apos teste.
+- Restauracao completa NAO validada: pg_restore falhou por dependencias do ambiente Supabase (auth.users e schemas/funcoes gerenciados). Exige ensaio em ambiente Supabase isolado e comparacao integral.
+- Supabase Free nao inclui backup automatico gerenciado; copia criptografada externa e automacao permanecem pendentes.
 - Storage MP4 precisa de copia independente: dump PostgreSQL nao contem bytes dos videos.
 - Proxima validacao: obter ferramentas PostgreSQL, executar backup real criptografado, ensaiar restauracao em banco isolado e comparar dados.
