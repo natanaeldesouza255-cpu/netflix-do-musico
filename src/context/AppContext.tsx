@@ -387,7 +387,13 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
     if(user?.role!=='admin'||!supabase||!students.some(s=>s.id===id&&s.role==='student'))return false;
     return mutate(async()=>{
       const {data,error}=await supabase!.functions.invoke('admin-delete-student',{body:{studentId:id}});
-      if(error||!data?.ok)throw new Error(data?.error||'Não foi possível excluir a conta.');
+      if(error||!data?.ok){
+        let reason = data?.error;
+        if(error && 'context' in error && error.context instanceof Response){
+          try { const body = await error.context.clone().json(); reason = body?.error || reason; } catch { /* resposta sem JSON */ }
+        }
+        throw new Error(reason || error?.message || 'Não foi possível excluir a conta.');
+      }
     },'Conta excluída permanentemente.');
   };
   const updateProfile=async(updated:Partial<StudentProfile>)=>{
