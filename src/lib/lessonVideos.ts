@@ -24,7 +24,7 @@ export async function getLessonVideoUrl(value: string): Promise<string> {
   if (!supabase) throw new Error('Supabase não configurado.');
   const path = storedVideoPath(value);
   if (!path) throw new Error('Vídeo armazenado inválido.');
-  const { data, error } = await supabase.storage.from(LESSON_VIDEO_BUCKET).createSignedUrl(path, 3600);
+  const { data, error } = await supabase.storage.from(LESSON_VIDEO_BUCKET).createSignedUrl(path, 900);
   if (error || !data?.signedUrl) throw new Error('Sem permissão para assistir a este vídeo.');
   return data.signedUrl;
 }
