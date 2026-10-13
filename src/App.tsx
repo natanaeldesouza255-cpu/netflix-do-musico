@@ -26,10 +26,12 @@ import { AdminMarketplace } from './pages/admin/AdminMarketplace';
 import { AdminEquipment } from './pages/admin/AdminEquipment';
 import { AdminSettings } from './pages/admin/AdminSettings';
 import { ShieldCheck } from 'lucide-react';
+import { PrivacySupportPage } from './pages/PrivacySupportPage';
 import { isFeatureEnabled } from './lib/platform';
 
 const MainLayout: React.FC = () => {
   const { currentScreen, isSubscriber, navigateTo, user, authLoading, dataError, dataWarning, refreshData, isSaving, isRecovery, settings, logoutUser } = useApp();
+  const [legalPage, setLegalPage] = React.useState<'privacy'|'terms'|'support'|null>(null);
   const adminPreview = user?.role === 'admin' && !isAdminScreen(currentScreen);
   const syncWarning = dataWarning && <div role="alert" className="p-3 border border-amber-500 text-amber-300"><p>{dataWarning}</p><button onClick={() => void refreshData()} className="underline">Atualizar dados</button></div>;
   const showStudentNavbar = isSubscriber || (user?.role === 'admin' && adminPreview);
@@ -68,6 +70,8 @@ const MainLayout: React.FC = () => {
   if (authLoading) return <div role="status" className="p-8 text-center">Carregando sua sessão…</div>;
   if (isRecovery) return <><LoginPage /><ToastHost /></>;
   if (dataError) return <div role="alert" className="p-8 text-center space-y-4"><p>Não foi possível carregar a plataforma.</p><p>{dataError}</p><button onClick={() => void refreshData()}>Tentar novamente</button><ToastHost /></div>;
+
+  if (legalPage) return <div className="min-h-screen bg-zinc-950 text-white"><div className="mx-auto max-w-3xl px-5 pt-6"><button className="text-purple-300 underline" onClick={()=>setLegalPage(null)}>← Voltar à plataforma</button></div><PrivacySupportPage tab={legalPage}/><ToastHost /></div>;
 
   if (user?.role === 'admin' && isAdminScreen(currentScreen) && !adminPreview) {
     return (
@@ -166,10 +170,9 @@ const MainLayout: React.FC = () => {
           </div>
 
           <div className="flex gap-6 flex-wrap justify-center text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
-            <button onClick={() => navigateTo('PublicHome')} className="hover:text-zinc-300">Termos de Uso</button>
-            <button onClick={() => navigateTo('PublicHome')} className="hover:text-zinc-300">Privacidade</button>
-            <button onClick={() => navigateTo('PublicHome')} className="hover:text-zinc-300">Suporte VIP</button>
-            <button onClick={() => navigateTo('PublicHome')} className="hover:text-zinc-300">Imprensa</button>
+            <button onClick={() => setLegalPage('terms')} className="hover:text-zinc-300">Termos de Uso</button>
+            <button onClick={() => setLegalPage('privacy')} className="hover:text-zinc-300">Privacidade</button>
+            <button onClick={() => setLegalPage('support')} className="hover:text-zinc-300">Suporte</button>
           </div>
 
           <div className="flex flex-col items-center md:items-end gap-1.5 text-zinc-650 text-[10px] text-center md:text-right font-medium">
@@ -177,7 +180,7 @@ const MainLayout: React.FC = () => {
               <ShieldCheck className="h-4 w-4 text-cyan-400" />
               Área de ensino musical
             </div>
-            <span>Â© {new Date().getFullYear()} Netflix do MÃºsico S.A. Todos os direitos reservados.</span>
+            <span>Â© {new Date().getFullYear()} Netflix do Músico Todos os direitos reservados.</span>
           </div>
         </div>
       </footer>
