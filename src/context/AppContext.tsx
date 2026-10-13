@@ -261,11 +261,14 @@ export const AppProvider: React.FC<{children:React.ReactNode}> = ({children}) =>
       if(!ok||!profile||profile.status!=='active'){
         await supabase.auth.signOut();showToast('error','Conta indisponÃ­vel. Contate o administrador.');return false;
       }
+      // Best-effort audit: never block a valid login when monitoring is unavailable.
+      try { await supabase.rpc('ndm_record_auth_event', { p_event: 'login_success' }); } catch { /* monitoring is non-blocking */ }
       setCurrentScreen(profile.role==='admin'?'AdminDashboard':'MemberHome');setHistoryStack([]);return true;
     }catch{showToast('error','NÃ£o foi possÃ­vel entrar. Tente novamente.');return false;}finally{signingIn.current=false;}
   };
   const logoutUser=async()=>{
     if(!supabase)return;
+    try { await supabase.rpc('ndm_record_auth_event', { p_event: 'logout' }); } catch { /* non-blocking audit */ }
     const {error}=await supabase.auth.signOut();
     if(error){showToast('error','NÃ£o foi possÃ­vel encerrar a sessÃ£o. Tente novamente.');return;}
     ++generation.current;setSnapshot(emptySnapshot());state.current=emptySnapshot();setCurrentScreen('Login');setHistoryStack([]);setScreenParams(null);setSearchQuery('');
