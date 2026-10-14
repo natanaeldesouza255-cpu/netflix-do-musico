@@ -4,12 +4,14 @@ import { Field, inputClass } from '../../components/admin/AdminModal';
 import { ArrowDown, ArrowUp, Eye, EyeOff } from 'lucide-react';
 
 export const AdminSettings: React.FC = () => {
-  const { settings, saveSettings } = useApp();
+  const { settings, saveSettings, isSaving, importLegacyContent } = useApp();
   const [form, setForm] = useState(settings);
 
-  useEffect(() => setForm(settings), [settings]);
+  const [dirty, setDirty] = useState(false);
+  useEffect(() => {if (!dirty) setForm(settings);}, [settings, dirty]);
 
   const moveMenuItem = (id: string, direction: 'up' | 'down') => {
+    setDirty(true);
     const menu = [...(form.adminMenu || [])].sort((a, b) => a.order - b.order);
     const index = menu.findIndex((item) => item.id === id);
     const target = direction === 'up' ? index - 1 : index + 1;
@@ -19,6 +21,7 @@ export const AdminSettings: React.FC = () => {
   };
 
   const updateMenuItem = (id: string, patch: { label?: string; visible?: boolean }) => {
+    setDirty(true);
     setForm({
       ...form,
       adminMenu: (form.adminMenu || []).map((item) => item.id === id ? { ...item, ...patch } : item),
@@ -32,11 +35,17 @@ export const AdminSettings: React.FC = () => {
         <p className="text-xs text-zinc-500 mt-1">Personalize a plataforma sem precisar alterar o código.</p>
       </div>
 
+      <details className="border border-zinc-800 rounded-xl p-4 text-sm">
+        <summary>Recuperar conteúdo da versão anterior</summary>
+        <p className="my-3">No navegador em que você editava os cursos, importe os cursos, módulos, aulas, lives, produtos e equipamentos salvos anteriormente. Itens já existentes no servidor serão preservados.</p>
+        <button type="button" disabled={isSaving} onClick={() => void importLegacyContent()} className="text-cyan-400">Importar conteúdo deste navegador</button>
+      </details>
       <form
         className="flex flex-col gap-5"
-        onSubmit={(e) => {
+        onChange={() => setDirty(true)}
+        onSubmit={async (e) => {
           e.preventDefault();
-          saveSettings(form);
+          if (await saveSettings(form)) setDirty(false);
         }}
       >
         <section className="glass-panel border border-zinc-800 rounded-2xl p-5 flex flex-col gap-3">
@@ -48,7 +57,7 @@ export const AdminSettings: React.FC = () => {
           <Field label="Informações gerais / tagline"><input className={inputClass} value={form.tagline} onChange={(e) => setForm({ ...form, tagline: e.target.value })} /></Field>
           <Field label="E-mail de suporte"><input className={inputClass} value={form.supportEmail} onChange={(e) => setForm({ ...form, supportEmail: e.target.value })} /></Field>
           <Field label="Nome do plano"><input className={inputClass} value={form.planName} onChange={(e) => setForm({ ...form, planName: e.target.value })} /></Field>
-          <Field label="Valor do plano (mock)"><input type="number" step="0.01" className={inputClass} value={form.planPrice} onChange={(e) => setForm({ ...form, planPrice: Number(e.target.value) })} /></Field>
+          <Field label="Valor do plano"><input type="number" step="0.01" className={inputClass} value={form.planPrice} onChange={(e) => setForm({ ...form, planPrice: Number(e.target.value) })} /></Field>
           <label className="flex items-center gap-2 text-xs">
             <input type="checkbox" checked={form.maintenanceMode} onChange={(e) => setForm({ ...form, maintenanceMode: e.target.checked })} />
             Modo manutenção

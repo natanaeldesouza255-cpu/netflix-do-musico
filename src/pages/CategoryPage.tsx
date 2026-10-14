@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { lessonsData, Lesson, MusicCategory, MusicLevel } from '../data/mockData';
+import { Lesson, MusicCategory, MusicLevel } from '../data/mockData';
 import { EpisodeCard } from '../components/EpisodeCard';
 import { Watermark } from '../components/Watermark';
+import { safeEmbedUrl } from '../lib/video';
+import { getLessonVideoUrl, isStoredLessonVideo } from '../lib/lessonVideos';
 import { 
   Play, 
   ChevronLeft, 
@@ -27,74 +29,40 @@ export const CategoryPage: React.FC = () => {
     favoriteLessons, 
     completedLessons,
     toggleLessonFavorite,
-    toggleLessonComplete 
+    toggleLessonComplete,
+    publishedLessons
   } = useApp();
 
   const activeCategory: MusicCategory = screenParams?.category || 'Violão';
-
-  // 1. FILTRAGEM DE AULAS DA CATEGORIA
-  const categoryLessons = lessonsData.filter(l => l.category === activeCategory);
-
-  // 2. CONTROLE DE NÍVEL (TEMPORADA) ATIVO
+  const categoryLessons = publishedLessons.filter(l => screenParams?.courseId ? l.courseId === screenParams.courseId : l.category === activeCategory);
   const levelsOrder: MusicLevel[] = ['Nível Zero', 'Aprendiz', 'Mediano', 'Profissional', 'Avançado'];
-  
-  // Decide qual nível selecionar por padrão: se houver aula ativa no params, pega o dela. Senão o primeiro nível disponível com aulas.
-  const [activeLevel, setActiveLevel] = useState<MusicLevel>(() => {
-    if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
-      if (match) return match.level;
-    }
-    // Procura primeiro nível que tem aula
-    for (const lvl of levelsOrder) {
-      if (categoryLessons.some(l => l.level === lvl)) return lvl;
-    }
-    return 'Nível Zero';
-  });
-
-  // Aulas do nível/temporada ativa
+  const [signedVideo, setSignedVideo] = useState<string | null>(null);
+  const [videoLoadError, setVideoLoadError] = useState('');
+  const [chosenLevel, setChosenLevel] = useState<MusicLevel | null>(null);
+  const [chosenLessonId, setChosenLessonId] = useState<string | null>(null);
+  useEffect(() => {setChosenLessonId(null);setChosenLevel(null);}, [screenParams]);
+  const requested = categoryLessons.find(l => l.id === (chosenLessonId || screenParams?.activeLessonId));
+  const activeLevel = chosenLevel && categoryLessons.some(l => l.level === chosenLevel) ? chosenLevel : requested?.level || categoryLessons[0]?.level || 'Nível Zero';
   const levelLessons = categoryLessons.filter(l => l.level === activeLevel);
-
-  // 3. CONTROLE DE AULA ATIVA (EPISÓDIO ATIVO)
-  const [activeLesson, setActiveLesson] = useState<Lesson>(() => {
-    if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
-      if (match) return match;
-    }
-    return levelLessons[0] || categoryLessons[0];
-  });
-
-  // Atualiza a aula ativa se os parâmetros mudarem (ex: busca rápida clicada)
+  const activeLesson = levelLessons.find(l => l.id === requested?.id) || levelLessons[0];
+  useEffect(() => {if(activeLesson) addToWatchedHistory(activeLesson.id);}, [activeLesson?.id]);
+  const handleLessonSelect = (lesson: Lesson) => {setChosenLessonId(lesson.id);setChosenLevel(lesson.level);};
+  const handleLevelChange = (level: MusicLevel) => {setChosenLevel(level);setChosenLessonId(null);};
   useEffect(() => {
-    if (screenParams?.activeLessonId) {
-      const match = lessonsData.find(l => l.id === screenParams.activeLessonId);
-      if (match) {
-        setActiveLesson(match);
-        setActiveLevel(match.level);
-      }
+    let alive = true;
+    setSignedVideo(null);setVideoLoadError('');
+    if (isStoredLessonVideo(activeLesson?.videoUrl)) {
+      getLessonVideoUrl(activeLesson?.videoUrl || '').then(url => {if(alive)setSignedVideo(url);})
+        .catch(() => {if(alive)setVideoLoadError('Não foi possível liberar este vídeo. Verifique sua assinatura e tente novamente.');});
     }
-  }, [screenParams]);
-
-  // Grava no histórico de "Continuar Assistindo" quando a aula é iniciada
-  useEffect(() => {
-    if (activeLesson) {
-      addToWatchedHistory(activeLesson.id);
-    }
-  }, [activeLesson]);
-
-  const handleLessonSelect = (lesson: Lesson) => {
-    setActiveLesson(lesson);
-  };
-
-  const handleLevelChange = (level: MusicLevel) => {
-    setActiveLevel(level);
-    const firstLessonInLevel = categoryLessons.find(l => l.level === level);
-    if (firstLessonInLevel) {
-      setActiveLesson(firstLessonInLevel);
-    }
-  };
+    return () => {alive=false;};
+  }, [activeLesson?.id, activeLesson?.videoUrl]);
+  if (!activeLesson) return <div className="p-8 text-center"><p>Nenhuma aula publicada neste curso.</p><button onClick={goBack} className="mt-4 text-purple-400">Voltar</button></div>;
 
   const isFavorited = favoriteLessons.includes(activeLesson.id);
   const isCompleted = completedLessons.includes(activeLesson.id);
+  const embedUrl = safeEmbedUrl(activeLesson.videoUrl);
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 flex flex-col gap-6" id="category-page-root">
@@ -128,39 +96,29 @@ export const CategoryPage: React.FC = () => {
             id="premium-video-player-container"
           >
             
-            {/* Player de Iframe real mockado com Embed de YouTube */}
-            <iframe 
-              src={`${activeLesson.videoUrl}?autoplay=1&modestbranding=1&controls=0&rel=0`} 
-              title={activeLesson.title}
-              className="w-full h-full object-cover"
-              allow="autoplay; encrypted-media; gyroscope"
-              allowFullScreen
-            />
-
-            {/* MARCA D'ÁGUA DINÂMICA INTEGRADA (PROTEÇÃO ANTICLONE) */}
+            {isStoredLessonVideo(activeLesson.videoUrl) ? (
+              signedVideo ? <video key={activeLesson.id} src={signedVideo} controls playsInline preload="metadata" className="w-full h-full bg-black" /> : <div role="status" className="w-full h-full flex items-center justify-center p-6 text-center text-zinc-300">{videoLoadError || "Carregando vídeo protegido..."}</div>
+            ) : embedUrl ? (
+              <iframe
+                key={activeLesson.id}
+                src={embedUrl + (embedUrl.includes('?') ? '&' : '?') + 'controls=1&autoplay=0'}
+                title={activeLesson.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allowFullScreen
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center p-6 text-center text-zinc-300">
+                Vídeo indisponível. Configure um link de incorporação do YouTube ou Vimeo no Admin.
+              </div>
+            )}
             <Watermark />
-
-            {/* Simulação de Controles Customizados Premium Sobrepostos */}
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black via-black/40 to-transparent p-3 sm:p-4 flex items-center justify-between gap-4 pointer-events-none opacity-80 sm:opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-full bg-white/10 border border-white/15 flex items-center justify-center">
-                  <Play className="h-3.5 w-3.5 fill-white text-white ml-0.5" />
-                </div>
-                <div className="text-[10px] text-zinc-300 font-mono">
-                  0:00 / {activeLesson.duration}
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Volume2 className="h-4.5 w-4.5 text-zinc-300" />
-                <Settings className="h-4.5 w-4.5 text-zinc-300" />
-                <Maximize2 className="h-4.5 w-4.5 text-zinc-300" />
-              </div>
-            </div>
 
             {/* Alerta de Link Protegido */}
             <div className="absolute top-3 left-3 bg-black/70 border border-red-500/20 text-red-400 text-[8px] sm:text-[9px] font-mono px-2 py-0.5 rounded flex items-center gap-1 pointer-events-none">
               <Lock className="h-3 w-3" />
-              URL PROTEGIDA POR DRM E IP
+              ÁREA DO ALUNO
             </div>
           </div>
 
@@ -216,22 +174,7 @@ export const CategoryPage: React.FC = () => {
               {activeLesson.description}
             </p>
 
-            {/* EXPLICAÇÃO TÉCNICA DA ARQUITETURA DRM (SEGURANÇA MVP) */}
-            <div className="bg-zinc-950 border border-zinc-900 rounded-xl p-4 mt-1 flex flex-col gap-2">
-              <div className="text-[10px] font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-                <ShieldAlert className="h-4 w-4 text-cyan-400" />
-                Arquitetura de Segurança de Vídeo & DRM
-              </div>
-              <p className="text-[11px] text-zinc-450 leading-relaxed">
-                Este MVP simula proteções de segurança completas para impedir clonagem e roubo de arquivos digitais:
-              </p>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[10px] text-zinc-550 list-disc list-inside">
-                <li><strong className="text-zinc-400">Marca D'água Dinâmica:</strong> Renderiza dados do usuário em posições randômicas reativas.</li>
-                <li><strong className="text-zinc-400">Proteção de Download:</strong> Links ocultados na DOM; bloqueio de clique direito e F12.</li>
-                <li><strong className="text-zinc-400">DRM Baseado em Chaves:</strong> Preparado para descriptografia Widevine e FairPlay em produção.</li>
-                <li><strong className="text-zinc-400">URLs Temporárias:</strong> Abstracionismo de endpoints de streaming assinados via tokens HMAC.</li>
-              </ul>
-            </div>
+
           </div>
 
         </div>

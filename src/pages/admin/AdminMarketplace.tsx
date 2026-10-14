@@ -53,7 +53,7 @@ export const AdminMarketplace: React.FC = () => {
       </div>
       <AdminModal open={!!form} title={form && 'id' in form && form.id ? 'Editar produto' : 'Novo produto'} onClose={() => setForm(null)}>
         {form && (
-          <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); saveMarketplaceItem(form); setForm(null); }}>
+          <form className="flex flex-col gap-3" onSubmit={async (e) => { e.preventDefault(); if (await saveMarketplaceItem(form)) setForm(null); }}>
             <Field label="Nome"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
             <Field label="Descrição"><textarea className={inputClass} rows={3} value={form.description || ''} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
             <Field label="Categoria">

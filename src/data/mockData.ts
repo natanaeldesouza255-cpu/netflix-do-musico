@@ -11,6 +11,7 @@ export type PaymentStatus = 'paid' | 'pending' | 'overdue' | 'cancelled';
 export type ModerationStatus = 'visible' | 'hidden' | 'reported';
 
 export interface Course {
+  _revision?: number;
   id: string;
   title: string;
   description: string;
@@ -23,6 +24,7 @@ export interface Course {
 }
 
 export interface CourseModule {
+  _revision?: number;
   id: string;
   courseId: string;
   name: string;
@@ -31,6 +33,7 @@ export interface CourseModule {
 }
 
 export interface Lesson {
+  _revision?: number;
   id: string;
   title: string;
   duration: string;
@@ -54,6 +57,7 @@ export interface EquipmentComment {
 }
 
 export interface Equipment {
+  _revision?: number;
   id: string;
   name: string;
   type: 'Baterias' | 'Violões' | 'Guitarras' | 'Microfones' | 'Interfaces' | 'Monitores' | 'Plugins' | 'Fones';
@@ -69,6 +73,7 @@ export interface Equipment {
 }
 
 export interface LiveSession {
+  _revision?: number;
   id: string;
   title: string;
   presenter: string;
@@ -82,6 +87,7 @@ export interface LiveSession {
 }
 
 export interface MarketplaceItem {
+  _revision?: number;
   id: string;
   name: string;
   type: 'VSTs' | 'Presets' | 'Sample Packs' | 'Cursos' | 'Materiais Digitais';
@@ -100,6 +106,8 @@ export interface PostComment {
 }
 
 export interface CommunityPost {
+  _revision?: number;
+  authorId?: string;
   id: string;
   authorName: string;
   authorInstrument: string;

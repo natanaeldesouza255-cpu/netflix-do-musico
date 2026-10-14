@@ -1,32 +1,38 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { useApp, ScreenName } from '../context/AppContext';
-import { lessonsData, equipmentsData } from '../data/mockData';
-import { 
-  Search, 
-  Menu, 
-  X, 
-  LogOut, 
-  User as UserIcon, 
-  Compass, 
-  BookOpen, 
-  Users, 
-  Radio, 
-  ShoppingBag, 
-  TrendingUp, 
+import {
+  Search,
+  Menu,
+  X,
+  LogOut,
+  User as UserIcon,
+  Compass,
+  BookOpen,
+  Users,
+  Radio,
+  ShoppingBag,
+  TrendingUp,
   Award,
   Zap
 } from 'lucide-react';
 
-export const Navbar: React.FC = () => {
-  const { 
-    user, 
-    isSubscriber, 
-    currentScreen, 
-    navigateTo, 
+interface NavbarProps { forceSubscriberView?: boolean; }
+
+export const Navbar: React.FC<NavbarProps> = ({ forceSubscriberView = false }) => {
+  const {
+    user,
+    isSubscriber,
+    currentScreen,
+    navigateTo,
     logoutUser,
     searchQuery,
-    setSearchQuery
+    setSearchQuery,
+    publishedLessons,
+    equipments,
+    settings
   } = useApp();
+
+  const showSubscriberUi = isSubscriber || forceSubscriberView;
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -34,17 +40,17 @@ export const Navbar: React.FC = () => {
   // LOGICA DE BUSCA
   const getSearchResults = () => {
     if (searchQuery.trim() === '') return [];
-    
+
     const query = searchQuery.toLowerCase();
-    
-    const filteredLessons = lessonsData.filter(l => 
-      l.title.toLowerCase().includes(query) || 
+
+    const filteredLessons = publishedLessons.filter(l =>
+      l.title.toLowerCase().includes(query) ||
       l.description.toLowerCase().includes(query) ||
       l.category.toLowerCase().includes(query)
     ).map(l => ({ ...l, type: 'Aulas' as const }));
 
-    const filteredEquips = equipmentsData.filter(e => 
-      e.name.toLowerCase().includes(query) || 
+    const filteredEquips = (isEnabled('equipment') ? equipments : []).filter(e => e.published !== false).filter(e =>
+      e.name.toLowerCase().includes(query) ||
       e.description.toLowerCase().includes(query) ||
       e.type.toLowerCase().includes(query)
     ).map(e => ({ ...e, type: 'Equipamentos' as const }));
@@ -52,48 +58,55 @@ export const Navbar: React.FC = () => {
     return [...filteredLessons, ...filteredEquips].slice(0, 6);
   };
 
-  const results = getSearchResults();
+
 
   const handleResultClick = (item: any) => {
     setSearchQuery('');
     setShowSearchResults(false);
-    
+
     if (item.type === 'Aulas') {
-      navigateTo('CategoryPage', { category: item.category, activeLessonId: item.id });
+      navigateTo('CategoryPage', { category: item.category, courseId: item.courseId, activeLessonId: item.id });
     } else {
       navigateTo('EquipmentReviews', { activeEqId: item.id });
     }
   };
 
+  const adminVisibility = new Map((settings.adminMenu || []).map((item) => [item.id, item.visible]));
+  const isEnabled = (id: string) => adminVisibility.get(id) !== false;
+  const results = getSearchResults();
+
+  const menuLabel = (id: string, fallback: string) =>
+    settings.adminMenu?.find((item) => item.id === id)?.label?.trim() || fallback;
+
   const navItems = [
     { label: 'Início', screen: 'MemberHome' as const, icon: Compass },
-    { label: 'Aulas', screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
-    { label: 'Comunidade', screen: 'CommunityPage' as const, icon: Users },
-    { label: 'Lives', screen: 'LivePage' as const, icon: Radio },
-    { label: 'Marketplace', screen: 'MarketplacePage' as const, icon: ShoppingBag },
-    { label: 'Equipamentos', screen: 'EquipmentReviews' as const, icon: Award },
+    { label: menuLabel('courses', 'Aulas'), screen: 'CategoryPage' as const, icon: BookOpen, params: { category: 'Violão' } },
+    ...(isEnabled('community') ? [{ label: menuLabel('community', 'Comunidade'), screen: 'CommunityPage' as const, icon: Users }] : []),
+    ...(isEnabled('lives') ? [{ label: menuLabel('lives', 'Lives'), screen: 'LivePage' as const, icon: Radio }] : []),
+    ...(isEnabled('marketplace') ? [{ label: menuLabel('marketplace', 'Marketplace'), screen: 'MarketplacePage' as const, icon: ShoppingBag }] : []),
+    ...(isEnabled('equipment') ? [{ label: menuLabel('equipment', 'Equipamentos'), screen: 'EquipmentReviews' as const, icon: Award }] : []),
     { label: 'Evolução', screen: 'StudentProfile' as const, icon: TrendingUp }
   ];
 
   return (
     <nav className="sticky top-0 z-50 w-full glass-panel border-b border-zinc-800/80 px-4 py-3 sm:px-6">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
-        
+
         {/* LOGO */}
-        <button 
-          onClick={() => navigateTo(isSubscriber ? 'MemberHome' : 'PublicHome')}
+        <button
+          onClick={() => navigateTo(showSubscriberUi ? 'MemberHome' : 'PublicHome')}
           className="flex items-center gap-2 font-heading text-lg sm:text-2xl font-extrabold tracking-tight text-white focus:outline-none"
         >
           <span className="bg-gradient-to-r from-purple-500 via-fuchsia-500 to-cyan-400 bg-clip-text text-transparent">
             NETFLIX
           </span>
           <span className="text-xs sm:text-sm font-light text-cyan-400 border border-cyan-400/30 px-1.5 py-0.5 rounded uppercase tracking-widest bg-cyan-950/40">
-            do Músico
+            do MÃºsico
           </span>
         </button>
 
         {/* BUSCA GLOBAL */}
-        {isSubscriber && (
+        {showSubscriberUi && (
           <div className="relative hidden md:block w-72 lg:w-96">
             <div className="relative">
               <input
@@ -141,7 +154,7 @@ export const Navbar: React.FC = () => {
 
         {/* MENU DESKTOP */}
         <div className="hidden lg:flex items-center gap-6">
-          {isSubscriber ? (
+          {showSubscriberUi ? (
             <>
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -151,8 +164,8 @@ export const Navbar: React.FC = () => {
                     key={item.label}
                     onClick={() => navigateTo(item.screen, item.params)}
                     className={`flex items-center gap-1.5 text-sm font-medium transition focus:outline-none ${
-                      isActive 
-                        ? 'text-cyan-400 font-semibold' 
+                      isActive
+                        ? 'text-cyan-400 font-semibold'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
@@ -183,7 +196,7 @@ export const Navbar: React.FC = () => {
                     </div>
                   </div>
                 </button>
-                <button 
+                <button
                   onClick={logoutUser}
                   className="text-zinc-500 hover:text-red-400 transition p-1.5 rounded-full hover:bg-zinc-900 focus:outline-none"
                   title="Sair da conta"
@@ -194,13 +207,13 @@ export const Navbar: React.FC = () => {
             </>
           ) : (
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 onClick={() => navigateTo('PublicHome')}
                 className={`text-sm font-medium transition ${currentScreen === 'PublicHome' ? 'text-white' : 'text-zinc-400 hover:text-white'}`}
               >
-                Início Público
+                InÃ­cio PÃºblico
               </button>
-              <button 
+              <button
                 onClick={() => navigateTo('Login')}
                 className="relative inline-flex items-center justify-center p-0.5 overflow-hidden text-sm font-bold text-white rounded-full group bg-gradient-to-br from-purple-600 to-cyan-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-cyan-400"
               >
@@ -212,9 +225,9 @@ export const Navbar: React.FC = () => {
           )}
         </div>
 
-        {/* BOTÃO MOBILE */}
+        {/* BOTÃƒO MOBILE */}
         <div className="flex items-center gap-3 lg:hidden">
-          {isSubscriber && (
+          {showSubscriberUi && (
             <div className="flex items-center gap-1.5 text-xs font-semibold bg-purple-950/40 border border-purple-500/20 text-purple-300 px-2 py-0.5 rounded-full">
               <Zap className="h-3 w-3 fill-purple-400 animate-pulse" />
               {user?.xp} XP
@@ -233,9 +246,9 @@ export const Navbar: React.FC = () => {
       {/* MENU MOBILE EXPANDIDO */}
       {mobileMenuOpen && (
         <div className="lg:hidden w-full glass-panel mt-4 rounded-xl border border-zinc-800/80 p-4 shadow-2xl flex flex-col gap-4 animate-fade-in">
-          
+
           {/* BUSCA MOBILE */}
-          {isSubscriber && (
+          {showSubscriberUi && (
             <div className="relative w-full">
               <input
                 type="text"
@@ -275,7 +288,7 @@ export const Navbar: React.FC = () => {
             </div>
           )}
 
-          {isSubscriber ? (
+          {showSubscriberUi ? (
             <div className="flex flex-col gap-3">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -288,8 +301,8 @@ export const Navbar: React.FC = () => {
                       setMobileMenuOpen(false);
                     }}
                     className={`flex items-center gap-3 p-2.5 rounded-lg text-left text-sm font-medium transition ${
-                      isActive 
-                        ? 'bg-cyan-950/40 border border-cyan-500/20 text-cyan-400' 
+                      isActive
+                        ? 'bg-cyan-950/40 border border-cyan-500/20 text-cyan-400'
                         : 'text-zinc-400 hover:text-white hover:bg-zinc-900/60'
                     }`}
                   >
@@ -317,7 +330,7 @@ export const Navbar: React.FC = () => {
                     <div className="text-xs text-purple-400 font-mono">{user?.email}</div>
                   </div>
                 </button>
-                <button 
+                <button
                   onClick={() => {
                     logoutUser();
                     setMobileMenuOpen(false);
@@ -331,16 +344,16 @@ export const Navbar: React.FC = () => {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              <button 
+              <button
                 onClick={() => {
                   navigateTo('PublicHome');
                   setMobileMenuOpen(false);
                 }}
                 className={`p-2.5 rounded-lg text-left text-sm font-medium ${currentScreen === 'PublicHome' ? 'bg-zinc-800 text-white' : 'text-zinc-400'}`}
               >
-                Início Público
+                InÃ­cio PÃºblico
               </button>
-              <button 
+              <button
                 onClick={() => {
                   navigateTo('Login');
                   setMobileMenuOpen(false);

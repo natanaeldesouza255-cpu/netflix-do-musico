@@ -1,18 +1,7 @@
-/**
- * Credenciais de teste do protótipo.
- * Futuro: substituir por autenticação real (Supabase/Auth).
- */
+/** Legacy prototype-only account labels. Never use for authentication or authorization. */
 export const TEST_ACCOUNTS = {
-  student: {
-    email: 'aluno@musico.com',
-    password: '123456',
-    label: 'Aluno / Assinante',
-  },
-  admin: {
-    email: 'natanaeldesouza255@gmail.com',
-    password: 'admin123',
-    label: 'Administrador',
-  },
+  student: { email: '', password: '', label: 'Aluno / Assinante' },
+  admin: { email: '', password: '', label: 'Administrador' },
 } as const;
 
 export type TestAccountRole = keyof typeof TEST_ACCOUNTS;

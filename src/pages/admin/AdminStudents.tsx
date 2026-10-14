@@ -4,8 +4,11 @@ import { ManagedUser } from '../../data/seedPlatform';
 import { Search } from 'lucide-react';
 
 export const AdminStudents: React.FC = () => {
-  const { students, completedLessons, catalogLessons, navigateTo, toggleStudentStatus } = useApp();
+  const { students, completedLessons, catalogLessons, navigateTo, toggleStudentStatus, deleteStudentAccount } = useApp();
   const [query, setQuery] = useState('');
+  const [deleting,setDeleting] = useState<ManagedUser | null>(null);
+  const [busy,setBusy] = useState(false);
+  const statusLabel: Record<string,string> = {active:'Ativa',pending:'Pendente',overdue:'Inadimplente',cancelled:'Cancelada',inactive:'Desativada'};
 
   const list = useMemo(() => {
     const q = query.toLowerCase();
@@ -70,24 +73,26 @@ export const AdminStudents: React.FC = () => {
                   </div>
                 </td>
                 <td className="p-3">{student.email}</td>
-                <td className="p-3 capitalize">{student.subscriptionStatus}</td>
-                <td className="p-3 font-mono">{student.createdAt}</td>
+                <td className="p-3 capitalize">{statusLabel[student.subscriptionStatus] || student.subscriptionStatus}</td>
+                <td className="p-3 font-mono">{student.createdAt ? new Date(student.createdAt).toLocaleDateString("pt-BR") : "-"} </td>
                 <td className="p-3">{student.xp}</td>
                 <td className="p-3">{progressFor(student)}%</td>
                 <td className="p-3">
-                  <span className={student.status === 'active' ? 'text-emerald-400' : 'text-zinc-500'}>{student.status}</span>
+                  <span className={student.status === 'active' ? 'text-emerald-400' : 'text-zinc-500'}>{statusLabel[student.status] || student.status}</span>
                 </td>
                 <td className="p-3 text-right">
                   <button onClick={() => navigateTo('AdminStudentDetail', { studentId: student.id })} className="text-purple-400 font-bold mr-3">Ver perfil</button>
                   <button onClick={() => toggleStudentStatus(student.id)} className="text-cyan-400 font-bold">
                     {student.status === 'active' ? 'Desativar' : 'Ativar'}
                   </button>
+                  <button onClick={() => setDeleting(student)} className="text-red-400 font-bold ml-3">Excluir</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      {deleting && <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"><div className="bg-zinc-950 border border-red-800 rounded-xl p-6 max-w-md space-y-4"><h2 className="font-bold">Excluir conta permanentemente?</h2><p className="text-sm">A conta {deleting.email} será excluída. Esta ação não pode ser desfeita. Para bloquear temporariamente, use Desativar.</p><div className="flex gap-3"><button disabled={busy} onClick={()=>setDeleting(null)}>Cancelar</button><button disabled={busy} className="bg-red-700 rounded px-4 py-2" onClick={async()=>{if(busy)return;setBusy(true);try{if(await deleteStudentAccount(deleting.id))setDeleting(null);}finally{setBusy(false);}}}>{busy?'Excluindo...':'Excluir definitivamente'}</button></div></div></div>}
     </div>
   );
 };

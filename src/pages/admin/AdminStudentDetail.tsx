@@ -45,7 +45,7 @@ export const AdminStudentDetail: React.FC = () => {
       >
         <h2 className="text-sm font-bold">Informações administrativas</h2>
         <Field label="Nome"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-        <Field label="E-mail"><input className={inputClass} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+        <Field label="E-mail"><input className={inputClass} value={form.email} readOnly title="O e-mail é gerenciado pela autenticação" /></Field>
         <Field label="Instrumento"><input className={inputClass} value={form.instrument} onChange={(e) => setForm({ ...form, instrument: e.target.value })} /></Field>
         <Field label="Nível"><input className={inputClass} value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} /></Field>
         <Field label="XP"><input type="number" className={inputClass} value={form.xp} onChange={(e) => setForm({ ...form, xp: Number(e.target.value) })} /></Field>

@@ -54,7 +54,7 @@ export const AdminEquipment: React.FC = () => {
       </div>
       <AdminModal wide open={!!form} title={form?.id ? 'Editar review de equipamento' : 'Novo review de equipamento'} onClose={() => setForm(null)}>
         {form && (
-          <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); saveEquipment(form); setForm(null); }}>
+          <form className="flex flex-col gap-3" onSubmit={async (e) => { e.preventDefault(); if (await saveEquipment(form)) setForm(null); }}>
             <Field label="Nome"><input className={inputClass} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required /></Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Marca"><input className={inputClass} value={form.brand || ''} onChange={(e) => setForm({ ...form, brand: e.target.value })} /></Field>

@@ -1,0 +1,21 @@
+name: Validate application
+on:
+  pull_request:
+  push:
+    branches: [main, feature/admin-aluno-integracao]
+permissions:
+  contents: read
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node scripts/check-security.mjs
+      - run: npm audit --omit=dev --audit-level=high
+      - run: npm test
+      - run: npm run build
